@@ -11,8 +11,7 @@
 using namespace std;
 
 int main() {
-  std::vector vec{1, 2};
-  fmt::print(
-"{}", vec);
+  std::vector<int> vec{1, 2};
+  fmt::print("{}\n", vec);
   return 0;
 }

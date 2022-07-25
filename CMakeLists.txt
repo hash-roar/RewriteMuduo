@@ -1,10 +1,14 @@
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 cmake_minimum_required(VERSION 3.1)
 
-project(rmuduo c cxx)
+project(rmuduo)
+find_package(fmt)
+add_executable(rmuduo main.cc)
+add_link_options(rmuduo fmt)
 
-set(CMAKE_MODULE_PATH
-    ${CMAKE_MODULE_PATH})
+add_subdirectory(src)
+target_link_libraries(rmuduo PUBLIC fmt)
+add_subdirectory(src/detail)
 
 set(CXX_FLAGS
  -g
