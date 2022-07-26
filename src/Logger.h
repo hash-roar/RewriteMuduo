@@ -1,11 +1,10 @@
 #pragma once
+#include <cstddef>
 #include <cstring>
 
 #include "detail/Buffer.h"
 #include "detail/Time.h"
 namespace rnet {
-
-class TimeZone;
 
 // 每条日志创建一个logger对象然后丢弃,在析构函数中写入异步日志后端
 // 意味着写入后端操作不能有异常
@@ -59,12 +58,12 @@ class Logger {
   static LogLevel logLevel();
   static void setLogLevel(LogLevel level);
 
-  using OutputFunc = void (*)(const char*, int);
+  using OutputFunc = void (*)(const char*, size_t);
   using FlushFunc = void (*)();
 
   static void setOutput(OutputFunc);
   static void setFlush(FlushFunc);
-  static void setTimeZone(const TimeZone& tz);
+  static void setTimeZone(const detail::TimeZone& tz);
 
  private:
   class Impl {
@@ -87,6 +86,20 @@ class Logger {
 extern Logger::LogLevel g_logLevel;
 
 inline Logger::LogLevel Logger::logLevel() { return g_logLevel; }
+
+class Fmt  // : noncopyable
+{
+ public:
+  template <typename T>
+  Fmt(const char* fmt, T val);
+
+  const char* data() const { return buf_; }
+  int length() const { return length_; }
+
+ private:
+  char buf_[32];
+  int length_;
+};
 
 //
 // CAUTION: do not write:
