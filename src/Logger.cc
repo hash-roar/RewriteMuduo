@@ -32,7 +32,7 @@ Logger::LogLevel initLogLevel() {
     return Logger::INFO;
 }
 
-Logger::LogLevel g_logLevel = initLogLevel();
+Logger::LogLevel GlobalLogLevel = initLogLevel();
 constexpr const char* LogLevelName[Logger::NUM_LOG_LEVELS] = {
     "TRACE ", "DEBUG ", "INFO  ", "WARN  ", "ERROR ", "FATAL ",
 };
@@ -65,7 +65,7 @@ void FlushStdout() { fflush(stdout); }
 
 Logger::OutputFunc GlobalOutput = WriteStdout;
 Logger::FlushFunc GlobalFlush = FlushStdout;
-TimeZone GlobalLogTimeZone;
+// TimeZone GlobalLogTimeZone;
 
 }  // namespace rnet
 
@@ -81,7 +81,7 @@ Logger::Impl::Impl(LogLevel level, int savedErrno, const SourceFile& file,
   stream_ << T(Thread::tidString(), Thread::tidStringLength());
   stream_ << T(LogLevelName[level], 6);
   if (savedErrno != 0) {
-    stream_ << strerror_tl(savedErrno) << " (errno=" << savedErrno << ") ";
+    stream_ << getErrnoMessage(savedErrno) << " (errno=" << savedErrno << ") ";
   }
 }
 
@@ -94,11 +94,12 @@ void Logger::Impl::formatTime() {
   if (seconds != tLastSecond) {
     tLastSecond = seconds;
     struct tm tm_time;
-    if (GlobalLogTimeZone.valid()) {
-      tm_time = GlobalLogTimeZone.toLocalTime(seconds);
-    } else {
-      ::gmtime_r(&seconds, &tm_time);  // FIXME TimeZone::fromUtcTime
-    }
+    // if (GlobalLogTimeZone.valid()) {
+    //   tm_time = GlobalLogTimeZone.toLocalTime(seconds);
+    // } else {
+    //   ::gmtime_r(&seconds, &tm_time);  // FIXME TimeZone::fromUtcTime
+    // }
+    ::gmtime_r(&seconds, &tm_time);  // FIXME TimeZone::fromUtcTime
 
     int len =
         snprintf(tTimeBuf.data(), tTimeBuf.size(), "%4d%02d%02d %02d:%02d:%02d",
@@ -108,13 +109,50 @@ void Logger::Impl::formatTime() {
     (void)len;
   }
 
-  if (GlobalLogTimeZone.valid()) {
-    Fmt us(".%06d ", microseconds);
-    assert(us.length() == 8);
-    stream_ << T(tTimeBuf.data(), 17) << T(us.data(), 8);
-  } else {
-    Fmt us(".%06dZ ", microseconds);
-    assert(us.length() == 9);
-    stream_ << T(tTimeBuf.data(), 17) << T(us.data(), 9);
+  // if (GlobalLogTimeZone.valid()) {
+  //   Fmt us(".%06d ", microseconds);
+  //   assert(us.length() == 8);
+  //   stream_ << T(tTimeBuf.data(), 17) << T(us.data(), 8);
+  // } else {
+  //   Fmt us(".%06dZ ", microseconds);
+  //   assert(us.length() == 9);
+  //   stream_ << T(tTimeBuf.data(), 17) << T(us.data(), 9);
+  // }
+  Fmt us(".%06dZ ", microseconds);
+  assert(us.length() == 9);
+  stream_ << T(tTimeBuf.data(), 17) << T(us.data(), 9);
+}
+
+void Logger::Impl::finish() {
+  stream_ << " - " << basename_ << ':' << line_ << '\n';
+}
+
+Logger::Logger(SourceFile file, int line) : impl_(INFO, 0, file, line) {}
+
+Logger::Logger(SourceFile file, int line, LogLevel level, const char* func)
+    : impl_(level, 0, file, line) {
+  impl_.stream_ << func << ' ';
+}
+
+Logger::Logger(SourceFile file, int line, LogLevel level)
+    : impl_(level, 0, file, line) {}
+
+Logger::Logger(SourceFile file, int line, bool toAbort)
+    : impl_(toAbort ? FATAL : ERROR, errno, file, line) {}
+
+Logger::~Logger() {
+  impl_.finish();
+  const LogStream::Buffer& buf(stream().buffer());
+  GlobalOutput(buf.data(), buf.length());
+  if (impl_.level_ == FATAL) {
+    GlobalFlush();
+    abort();
   }
 }
+void Logger::setLogLevel(Logger::LogLevel level) { GlobalLogLevel = level; }
+
+void Logger::setOutput(OutputFunc out) { GlobalOutput = out; }
+
+void Logger::setFlush(FlushFunc flush) { GlobalFlush = flush; }
+
+// void Logger::setTimeZone(const TimeZone& tz) { GlobalLogTimeZone = tz; }

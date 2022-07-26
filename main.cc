@@ -8,13 +8,15 @@
 #include <string>
 #include <vector>
 
+#include "Logger.h"
 #include "detail/Time.h"
 using namespace std;
 
+using namespace rnet;
+
 int main() {
-  auto t = rnet::detail::Timestamp::now();
-  fmt::print("{}\n", t.toFormattedString());
-  fmt::print("{}\n", t.secondsSinceEpoch());
-  fmt::print("{}\n", t.toString());
-  fmt::print("{}\n", t.toChronoSysTime().time_since_epoch().count());
+  // LOG_INFO << fmt::format("this is log {}", "fgeada");
+  rnet::Logger("filename/fasfda", 11).stream()
+      << fmt::format("this is log {}", "fgeada");
+  return 0;
 }

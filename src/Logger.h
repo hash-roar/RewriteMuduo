@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <cstddef>
 #include <cstring>
 
@@ -35,7 +36,7 @@ class Logger {
       }
     }
 
-    explicit SourceFile(const char* filename) : data_(filename) {
+    SourceFile(const char* filename) : data_(filename) {
       const char* slash = strrchr(filename, '/');
       if (slash) {
         data_ = slash + 1;
@@ -63,7 +64,7 @@ class Logger {
 
   static void setOutput(OutputFunc);
   static void setFlush(FlushFunc);
-  static void setTimeZone(const detail::TimeZone& tz);
+  // static void setTimeZone(const detail::TimeZone& tz);
 
  private:
   class Impl {
@@ -83,15 +84,21 @@ class Logger {
   Impl impl_;
 };
 
-extern Logger::LogLevel g_logLevel;
+extern Logger::LogLevel GlobalLogLevel;
 
-inline Logger::LogLevel Logger::logLevel() { return g_logLevel; }
+inline Logger::LogLevel Logger::logLevel() { return GlobalLogLevel; }
 
 class Fmt  // : noncopyable
 {
  public:
   template <typename T>
-  Fmt(const char* fmt, T val);
+  Fmt(const char* fmt, T val) {
+    static_assert(std::is_arithmetic<T>::value == true,
+                  "Must be arithmetic type");
+
+    length_ = snprintf(buf_, sizeof buf_, fmt, val);
+    assert(static_cast<size_t>(length_) < sizeof buf_);
+  }
 
   const char* data() const { return buf_; }
   int length() const { return length_; }
@@ -117,24 +124,22 @@ class Fmt  // : noncopyable
 //   else
 //     logWarnStream << "Bad news";
 //
-#define LOG_TRACE                                        \
-  if (muduo::Logger::logLevel() <= muduo::Logger::TRACE) \
-  muduo::Logger(__FILE__, __LINE__, muduo::Logger::TRACE, __func__).stream()
-#define LOG_DEBUG                                        \
-  if (muduo::Logger::logLevel() <= muduo::Logger::DEBUG) \
-  muduo::Logger(__FILE__, __LINE__, muduo::Logger::DEBUG, __func__).stream()
-#define LOG_INFO                                        \
-  if (muduo::Logger::logLevel() <= muduo::Logger::INFO) \
-  muduo::Logger(__FILE__, __LINE__).stream()
-#define LOG_WARN muduo::Logger(__FILE__, __LINE__, muduo::Logger::WARN).stream()
-#define LOG_ERROR \
-  muduo::Logger(__FILE__, __LINE__, muduo::Logger::ERROR).stream()
-#define LOG_FATAL \
-  muduo::Logger(__FILE__, __LINE__, muduo::Logger::FATAL).stream()
-#define LOG_SYSERR muduo::Logger(__FILE__, __LINE__, false).stream()
-#define LOG_SYSFATAL muduo::Logger(__FILE__, __LINE__, true).stream()
+#define LOG_TRACE                                      \
+  if (rnet::Logger::logLevel() <= rnet::Logger::TRACE) \
+  rnet::Logger(__FILE__, __LINE__, rnet::Logger::TRACE, __func__).stream()
+#define LOG_DEBUG                                      \
+  if (rnet::Logger::logLevel() <= rnet::Logger::DEBUG) \
+  rnet::Logger(__FILE__, __LINE__, rnet::Logger::DEBUG, __func__).stream()
+#define LOG_INFO                                      \
+  if (rnet::Logger::logLevel() <= rnet::Logger::INFO) \
+  rnet::Logger(__FILE__, __LINE__).stream()
+#define LOG_WARN rnet::Logger(__FILE__, __LINE__, rnet::Logger::WARN).stream()
+#define LOG_ERROR rnet::Logger(__FILE__, __LINE__, rnet::Logger::ERROR).stream()
+#define LOG_FATAL rnet::Logger(__FILE__, __LINE__, rnet::Logger::FATAL).stream()
+#define LOG_SYSERR rnet::Logger(__FILE__, __LINE__, false).stream()
+#define LOG_SYSFATAL rnet::Logger(__FILE__, __LINE__, true).stream()
 
-const char* strerror_tl(int savedErrno);
+const char* getErrnoMessage(int savedErrno);
 
 // Taken from glog/logging.h
 //
