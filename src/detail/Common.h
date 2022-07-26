@@ -1,10 +1,13 @@
 #pragma once
 
 // 一些最基础的组件
+#include <chrono>
 #include <cstddef>
 #include <cstring>
 namespace rnet::detail {
 
+using SysTimep_t = std::chrono::time_point<std::chrono::system_clock>;
+using SteadyTimep_t = std::chrono::time_point<std::chrono::steady_clock>;
 // 直接继承此类导致子类不可被复制
 class noncopyable {
  public:

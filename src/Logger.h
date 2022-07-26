@@ -1,13 +1,18 @@
 #pragma once
+#include <cstring>
+
+#include "detail/Buffer.h"
+#include "detail/Time.h"
 namespace rnet {
-// Use of this source code is governed by a BSD-style license
-// that can be found in the License file.
-//
-// Author: Shuo Chen (chenshuo at chenshuo dot com)
 
 class TimeZone;
 
+// 每条日志创建一个logger对象然后丢弃,在析构函数中写入异步日志后端
+// 意味着写入后端操作不能有异常
 class Logger {
+  using LogStream = detail::LogStream;
+  using Timestamp = detail::Timestamp;
+
  public:
   enum LogLevel {
     TRACE,
@@ -23,7 +28,7 @@ class Logger {
   class SourceFile {
    public:
     template <int N>
-    SourceFile(const char (&arr)[N]) : data_(arr), size_(N - 1) {
+    SourceFile(char (&arr)[N]) : data_(arr), size_(N - 1) {
       const char* slash = strrchr(data_, '/');  // builtin function
       if (slash) {
         data_ = slash + 1;
@@ -123,9 +128,8 @@ const char* strerror_tl(int savedErrno);
 // Check that the input is non NULL.  This very useful in constructor
 // initializer lists.
 
-#define CHECK_NOTNULL(val)                                                 \
-  ::muduo::CheckNotNull(__FILE__, __LINE__, "'" #val "' Must be non NULL", \
-                        (val))
+#define CHECK_NOTNULL(val) \
+  ::rnet::CheckNotNull(__FILE__, __LINE__, "'" #val "' Must be non NULL", (val))
 
 // A small helper for CHECK_NOTNULL().
 template <typename T>
@@ -135,7 +139,5 @@ T* CheckNotNull(Logger::SourceFile file, int line, const char* names, T* ptr) {
   }
   return ptr;
 }
-
-#endif  // MUDUO_BASE_LOGGING_H
 
 }  // namespace rnet

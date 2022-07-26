@@ -7,10 +7,14 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include "detail/Time.h"
 using namespace std;
 
 int main() {
-  std::vector<int> vec{1, 2};
-  fmt::print("{}\n", vec);
-  return 0;
+  auto t = rnet::detail::Timestamp::now();
+  fmt::print("{}\n", t.toFormattedString());
+  fmt::print("{}\n", t.secondsSinceEpoch());
+  fmt::print("{}\n", t.toString());
+  fmt::print("{}\n", t.toChronoSysTime().time_since_epoch().count());
 }
