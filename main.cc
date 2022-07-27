@@ -9,14 +9,16 @@
 #include <vector>
 
 #include "Logger.h"
+#include "detail/Thread.h"
 #include "detail/Time.h"
 using namespace std;
 
 using namespace rnet;
 
 int main() {
-  // LOG_INFO << fmt::format("this is log {}", "fgeada");
-  rnet::Logger("filename/fasfda", 11).stream()
-      << fmt::format("this is log {}sacccccccccccccccccccccc", "fgeada");
+  rnet::Thread::Thread t([] { fmt::print("this is from another thread\n"); });
+
+  t.start();
+  t.join();
   return 0;
 }

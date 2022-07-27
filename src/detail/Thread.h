@@ -1,8 +1,12 @@
 #pragma once
 
+#include <atomic>
 #include <condition_variable>
 #include <cstdint>
+#include <functional>
+#include <memory>
 #include <mutex>
+#include <thread>
 
 #include "Common.h"
 namespace rnet {
@@ -38,8 +42,6 @@ bool isMainThread();
 
 void sleepUsec(int64_t usec);  // for testing
 
-
-
 class CountDownLatch : detail::noncopyable {
  public:
   explicit CountDownLatch(int count);
@@ -56,10 +58,43 @@ class CountDownLatch : detail::noncopyable {
   int count_;
 };
 
+class Thread : detail::noncopyable {
+ public:
+  using ThreadFunc = std::function<void()>;
+
+  explicit Thread(ThreadFunc, const std::string& name = std::string());
+  // FIXME: make it movable in C++11
+  ~Thread();
+
+  void start();
+  void join();  // return pthread_join()
+
+  bool started() const { return started_; }
+  // pthread_t pthreadId() const { return pthreadId_; }
+  pid_t tid() const { return tid_; }
+  const std::string& name() const { return name_; }
+
+  static int numCreated() {
+    return numCreated_.load(std::memory_order_acq_rel);
+  }
+
+ private:
+  void setDefaultName();
+
+  bool started_;
+  std::unique_ptr<std::thread> thread_;
+  pid_t tid_;
+  ThreadFunc func_;
+  std::string name_;
+
+  // 此倒计时用于
+  CountDownLatch latch_;
+
+  static std::atomic_int32_t numCreated_;
+};
+
 }  // namespace Thread
 
 // TODO string stackTrace(bool demangle)
-
-
 
 }  // namespace rnet
