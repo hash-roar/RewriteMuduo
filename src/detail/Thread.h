@@ -1,6 +1,10 @@
 #pragma once
 
+#include <condition_variable>
 #include <cstdint>
+#include <mutex>
+
+#include "Common.h"
 namespace rnet {
 
 namespace Thread {
@@ -33,8 +37,29 @@ inline const char* name() { return tThreadName; }
 bool isMainThread();
 
 void sleepUsec(int64_t usec);  // for testing
+
+
+
+class CountDownLatch : detail::noncopyable {
+ public:
+  explicit CountDownLatch(int count);
+
+  void wait();
+
+  void countDown();
+
+  int getCount() const;
+
+ private:
+  mutable std::mutex mutex_;
+  std::condition_variable condition_;
+  int count_;
+};
+
 }  // namespace Thread
 
 // TODO string stackTrace(bool demangle)
+
+
 
 }  // namespace rnet

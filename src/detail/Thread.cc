@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include <cstdio>
+#include <mutex>
 
 #include "Time.h"
 
@@ -29,10 +30,32 @@ void getTidAndCache() {
 bool isMainThread() { return tid() == getpid(); }
 void sleepUsec(int64_t usec) {
   struct timespec ts = {0, 0};
-  ts.tv_sec = static_cast<time_t>(usec / detail::Timestamp::kMicroSecondsPerSecond);
-  ts.tv_nsec =
-      static_cast<long>(usec % detail::Timestamp::kMicroSecondsPerSecond * 1000);
+  ts.tv_sec =
+      static_cast<time_t>(usec / detail::Timestamp::kMicroSecondsPerSecond);
+  ts.tv_nsec = static_cast<long>(
+      usec % detail::Timestamp::kMicroSecondsPerSecond * 1000);
   ::nanosleep(&ts, NULL);
+}
+
+CountDownLatch::CountDownLatch(int count)
+    : mutex_(), condition_(), count_(count) {}
+
+void CountDownLatch::wait() {
+  std::unique_lock lock(mutex_);
+  condition_.wait(lock, [this] { return this->count_ > 0; });
+}
+
+void CountDownLatch::countDown() {
+  std::unique_lock lock(mutex_);
+  --count_;
+  if (count_ == 0) {
+    condition_.notify_all();
+  }
+}
+
+int CountDownLatch::getCount() const {
+  std::lock_guard lock(mutex_);
+  return count_;
 }
 
 }  // namespace rnet::Thread

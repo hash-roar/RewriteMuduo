@@ -17,6 +17,6 @@ using namespace rnet;
 int main() {
   // LOG_INFO << fmt::format("this is log {}", "fgeada");
   rnet::Logger("filename/fasfda", 11).stream()
-      << fmt::format("this is log {}", "fgeada");
+      << fmt::format("this is log {}sacccccccccccccccccccccc", "fgeada");
   return 0;
 }
