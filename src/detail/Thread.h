@@ -71,7 +71,7 @@ class Thread : detail::noncopyable {
 
   bool started() const { return started_; }
   // pthread_t pthreadId() const { return pthreadId_; }
-  pid_t tid() const { return tid_; }
+  pid_t gettid() const { return tid_; }
   const std::string& name() const { return name_; }
 
   static int numCreated() {

@@ -95,7 +95,7 @@
           "description": "Avoid stepping into libraries"
         }
       ]
-    }
+    },
     {
       "name": "LLDB:Cmake",
       "type": "lldb",

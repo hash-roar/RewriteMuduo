@@ -49,7 +49,7 @@ CountDownLatch::CountDownLatch(int count)
 
 void CountDownLatch::wait() {
   std::unique_lock lock(mutex_);
-  condition_.wait(lock, [this] { return this->count_ > 0; });
+  condition_.wait(lock, [this] { return this->count_ == 0; });
 }
 
 void CountDownLatch::countDown() {
@@ -104,7 +104,7 @@ void Thread::start() {
   //   latch_.wait();
   //   assert(tid_ > 0);
   // }
-
+  started_ = true;
   thread_ = std::make_unique<std::thread>([this] {
     tid_ = tid();
     latch_.countDown();
