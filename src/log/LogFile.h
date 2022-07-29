@@ -8,7 +8,7 @@
 #include "base/Common.h"
 #include "file/File.h"
 
-namespace rnet::detail {
+namespace rnet::log {
 class LogFile : noncopyable {
  public:
   LogFile(const std::string& basename, off_t rollSize, bool threadSafe = true,
@@ -40,4 +40,4 @@ class LogFile : noncopyable {
   const static int kRollPerSeconds_ = 60 * 60 * 24;
 };
 
-}  // namespace rnet::detail
+}  // namespace rnet::log

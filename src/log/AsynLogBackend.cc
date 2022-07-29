@@ -1,11 +1,15 @@
-#include "AsynLogBackend.h"
+#include "log/AsynLogBackend.h"
 
 #include <cassert>
+#include <chrono>
 #include <mutex>
 #include <string>
 
+#include "log/LogFile.h"
+#include "unix/Time.h"
+
 using namespace rnet;
-using namespace rnet::detail;
+using namespace rnet::log;
 
 AsyncLogging::AsyncLogging(const std::string& basename, off_t rollSize,
                            int flushInterval)
@@ -59,11 +63,13 @@ void AsyncLogging::threadFunc() {
     assert(buffersToWrite.empty());
 
     {
-      muduo::MutexLockGuard lock(mutex_);
-      if (buffers_.empty())  // unusual usage!
-      {
-        cond_.waitForSeconds(flushInterval_);
-      }
+      std::unique_lock lock(mutex_);
+      // if (buffers_.empty())  // unusual usage!
+      // {
+      //   cond_.waitForSeconds(flushInterval_);
+      // }
+      cond_.wait_for(lock, std::chrono::seconds{flushInterval_},
+                     [this] { return !buffers_.empty(); });
       buffers_.push_back(std::move(currentBuffer_));
       currentBuffer_ = std::move(newBuffer1);
       buffersToWrite.swap(buffers_);
@@ -78,7 +84,7 @@ void AsyncLogging::threadFunc() {
       char buf[256];
       snprintf(buf, sizeof buf,
                "Dropped log messages at %s, %zd larger buffers\n",
-               Timestamp::now().toFormattedString().c_str(),
+               Unix::Timestamp::now().toFormattedString().c_str(),
                buffersToWrite.size() - 2);
       fputs(buf, stderr);
       output.append(buf, static_cast<int>(strlen(buf)));

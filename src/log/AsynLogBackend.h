@@ -8,11 +8,11 @@
 #include <thread>
 #include <vector>
 
-#include "Buffer.h"
-#include "Common.h"
-#include "Thread.h"
+#include "base/Common.h"
+#include "file/Buffer.h"
+#include "unix/Thread.h"
 
-namespace rnet::detail {
+namespace rnet::log {
 class AsyncLogging : noncopyable {
  public:
   AsyncLogging(const std::string& basename, off_t rollSize,
@@ -28,6 +28,7 @@ class AsyncLogging : noncopyable {
 
   void start() {
     running_ = true;
+    thread_.start();
     latch_.wait();
   }
 
@@ -40,7 +41,7 @@ class AsyncLogging : noncopyable {
  private:
   void threadFunc();
 
-  using Buffer = rnet::detail::SizedBuffer<rnet::detail::kLargeSize>;
+  using Buffer = rnet::File::SizedBuffer<rnet::File::kLargeSize>;
   using BufferVector = std::vector<std::unique_ptr<Buffer>>;
   using BufferPtr = BufferVector::value_type;
 
@@ -56,4 +57,4 @@ class AsyncLogging : noncopyable {
   BufferPtr nextBuffer_;
   BufferVector buffers_;
 };
-}  // namespace rnet::detail
+}  // namespace rnet::log

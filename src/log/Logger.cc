@@ -1,9 +1,9 @@
 #include "log/Logger.h"
 
-#include <cassert>
 #include <bits/types/time_t.h>
 
 #include <array>
+#include <cassert>
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
@@ -66,9 +66,11 @@ Logger::OutputFunc GlobalOutput = WriteStdout;
 Logger::FlushFunc GlobalFlush = FlushStdout;
 // TimeZone GlobalLogTimeZone;
 
-} // namespace rnet::log
+}  // namespace rnet::log
 
 using namespace rnet::log;
+
+
 
 Logger::Impl::Impl(LogLevel level, int savedErrno, const SourceFile& file,
                    int line)

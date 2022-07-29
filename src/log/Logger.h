@@ -3,10 +3,12 @@
 #include <cstddef>
 #include <cstring>
 
-#include "detail/Buffer.h"
+#include "Logger.h"
+#include "file/Buffer.h"
 #include "log/LogStream.h"
 #include "unix/Time.h"
-namespace rnet::log {
+namespace rnet {
+namespace log {
 
 // 每条日志创建一个logger对象然后丢弃,在析构函数中写入异步日志后端
 // 意味着写入后端操作不能有异常
@@ -108,6 +110,7 @@ class Fmt  // : noncopyable
   int length_;
 };
 
+}  // namespace log
 //
 // CAUTION: do not write:
 //
@@ -124,20 +127,21 @@ class Fmt  // : noncopyable
 //   else
 //     logWarnStream << "Bad news";
 //
-#define LOG_TRACE                                      \
-  if (rnet::Logger::logLevel() <= rnet::Logger::TRACE) \
-  rnet::Logger(__FILE__, __LINE__, rnet::Logger::TRACE, __func__).stream()
-#define LOG_DEBUG                                      \
-  if (rnet::Logger::logLevel() <= rnet::Logger::DEBUG) \
-  rnet::Logger(__FILE__, __LINE__, rnet::Logger::DEBUG, __func__).stream()
-#define LOG_INFO                                      \
-  if (rnet::Logger::logLevel() <= rnet::Logger::INFO) \
-  rnet::Logger(__FILE__, __LINE__).stream()
-#define LOG_WARN rnet::Logger(__FILE__, __LINE__, rnet::Logger::WARN).stream()
-#define LOG_ERROR rnet::Logger(__FILE__, __LINE__, rnet::Logger::ERROR).stream()
-#define LOG_FATAL rnet::Logger(__FILE__, __LINE__, rnet::Logger::FATAL).stream()
-#define LOG_SYSERR rnet::Logger(__FILE__, __LINE__, false).stream()
-#define LOG_SYSFATAL rnet::Logger(__FILE__, __LINE__, true).stream()
+
+#define LOG_TRACE                                    \
+  if (log::Logger::logLevel() <= log::Logger::TRACE) \
+  log::Logger(__FILE__, __LINE__, log::Logger::TRACE, __func__).stream()
+#define LOG_DEBUG                                    \
+  if (log::Logger::logLevel() <= log::Logger::DEBUG) \
+  log::Logger(__FILE__, __LINE__, log::Logger::DEBUG, __func__).stream()
+#define LOG_INFO                                    \
+  if (log::Logger::logLevel() <= log::Logger::INFO) \
+  log::Logger(__FILE__, __LINE__).stream()
+#define LOG_WARN log::Logger(__FILE__, __LINE__, log::Logger::WARN).stream()
+#define LOG_ERROR log::Logger(__FILE__, __LINE__, log::Logger::ERROR).stream()
+#define LOG_FATAL log::Logger(__FILE__, __LINE__, log::Logger::FATAL).stream()
+#define LOG_SYSERR log::Logger(__FILE__, __LINE__, false).stream()
+#define LOG_SYSFATAL log::Logger(__FILE__, __LINE__, true).stream()
 
 // const char* getErrnoMessage(int savedErrno);
 
@@ -147,15 +151,16 @@ class Fmt  // : noncopyable
 // initializer lists.
 
 #define CHECK_NOTNULL(val) \
-  ::rnet::CheckNotNull(__FILE__, __LINE__, "'" #val "' Must be non NULL", (val))
+  ::log::CheckNotNull(__FILE__, __LINE__, "'" #val "' Must be non NULL", (val))
 
 // A small helper for CHECK_NOTNULL().
 template <typename T>
-T* CheckNotNull(Logger::SourceFile file, int line, const char* names, T* ptr) {
+T* CheckNotNull(log::Logger::SourceFile file, int line, const char* names,
+                T* ptr) {
   if (ptr == NULL) {
-    Logger(file, line, Logger::FATAL).stream() << names;
+    log::Logger(file, line, log::Logger::FATAL).stream() << names;
   }
   return ptr;
 }
 
-}  // namespace rnet::log
+}  // namespace rnet

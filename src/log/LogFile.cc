@@ -1,4 +1,4 @@
-#include "LogFile.h"
+#include "log/LogFile.h"
 
 #include <bits/types/FILE.h>
 
@@ -10,7 +10,7 @@
 #include "unix/ProcssInfo.h"
 
 using namespace rnet;
-using namespace rnet::detail;
+using namespace rnet::log;
 
 LogFile::LogFile(const std::string& basename, off_t rollSize, bool threadSafe,
                  int flushInterval, int checkEveryN)
