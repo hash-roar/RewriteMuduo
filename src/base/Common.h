@@ -4,7 +4,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstring>
-namespace rnet::detail {
+namespace rnet {
 
 using SysTimep_t = std::chrono::time_point<std::chrono::system_clock>;
 using SteadyTimep_t = std::chrono::time_point<std::chrono::steady_clock>;
@@ -27,4 +27,4 @@ inline To implicit_cast(From const &f) {
 // 将缓冲区置零
 inline void memZero(void *p, size_t n) { memset(p, 0, n); }
 
-}  // namespace rnet::detail
+}  // namespace rnet

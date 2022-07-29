@@ -2,6 +2,8 @@
 
 #include <cassert>
 #include <mutex>
+#include <optional>
+#include "File.h"
 
 using namespace rnet;
 using namespace rnet::detail;
@@ -13,7 +15,7 @@ LogFile::LogFile(const std::string& basename, off_t rollSize, bool threadSafe,
       flushInterval_(flushInterval),
       checkEveryN_(checkEveryN),
       count_(0),
-      mutex_(threadSafe ? new std::mutex : nullptr),
+      mutex_(threadSafe ? std::make_optional<std::mutex>() : std::nullopt),
       startOfPeriod_(0),
       lastRoll_(0),
       lastFlush_(0) {
@@ -24,8 +26,8 @@ LogFile::LogFile(const std::string& basename, off_t rollSize, bool threadSafe,
 LogFile::~LogFile() = default;
 
 void LogFile::append(const char* logline, int len) {
-  if (mutex_) {
-    std::lock_guard lock(*mutex_);
+  if (mutex_.has_value()) {
+    std::lock_guard lock(mutex_.value());
     append_unlocked(logline, len);
   } else {
     append_unlocked(logline, len);
@@ -33,8 +35,8 @@ void LogFile::append(const char* logline, int len) {
 }
 
 void LogFile::flush() {
-  if (mutex_) {
-    std::lock_guard lock(*mutex_);
+  if (mutex_.has_value()) {
+    std::lock_guard lock(mutex_.value());
     file_->flush();
   } else {
     file_->flush();
@@ -71,7 +73,7 @@ bool LogFile::rollFile() {
     lastRoll_ = now;
     lastFlush_ = now;
     startOfPeriod_ = start;
-    file_.reset(new FileUtil::AppendFile(filename));
+    file_.reset(new detail::AppendFile(filename));
     return true;
   }
   return false;

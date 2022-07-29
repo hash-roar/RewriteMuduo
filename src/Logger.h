@@ -4,14 +4,14 @@
 #include <cstring>
 
 #include "detail/Buffer.h"
-#include "detail/Time.h"
+#include "unix/Time.h"
 namespace rnet {
 
 // 每条日志创建一个logger对象然后丢弃,在析构函数中写入异步日志后端
 // 意味着写入后端操作不能有异常
 class Logger {
   using LogStream = detail::LogStream;
-  using Timestamp = detail::Timestamp;
+  using Timestamp = Unix::Timestamp;
 
  public:
   enum LogLevel {

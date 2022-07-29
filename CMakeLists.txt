@@ -44,7 +44,7 @@ find_package(fmt REQUIRED)
 
 add_executable(rmuduotest main.cc)
 target_include_directories(rmuduotest 
-    PRIVATE
+    PUBLIC
     ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(rmuduotest  fmt)
 target_link_libraries(rmuduotest  rnet)

@@ -6,8 +6,7 @@
 #include <cinttypes>
 #include <vector>
 
-using namespace rnet;
-using namespace rnet::detail;
+using namespace rnet::Unix;
 using namespace std;
 
 static_assert(sizeof(Timestamp) == sizeof(int64_t),

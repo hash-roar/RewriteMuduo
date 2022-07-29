@@ -5,9 +5,9 @@
 #include <memory>
 #include <string>
 
-#include "Common.h"
+#include "base/Common.h"
 
-namespace rnet::detail {
+namespace rnet::Unix {
 class Timestamp {
  public:
   ///
@@ -33,8 +33,8 @@ class Timestamp {
 
   bool valid() const { return microSecondsSinceEpoch_ > 0; }
 
-  SysTimep_t toChronoSysTime() const {
-    return SysTimep_t{std::chrono::microseconds{microSecondsSinceEpoch_}};
+  detail::SysTimep_t toChronoSysTime() const {
+    return detail::SysTimep_t{std::chrono::microseconds{microSecondsSinceEpoch_}};
   }
   // for internal usage.
   int64_t microSecondsSinceEpoch() const { return microSecondsSinceEpoch_; }
@@ -92,4 +92,4 @@ class Timestamp {
 //  private:
 //   std::shared_ptr<Data> data_;
 // };
-}  // namespace rnet::detail
+}  // namespace rnet::unix
