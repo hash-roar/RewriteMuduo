@@ -23,6 +23,11 @@ thread_local int tCachedThreadId = 0;
 thread_local char tTreadIdString[32];
 thread_local int tTreadIdStringLen = 6;
 thread_local const char* tThreadName = "unknown";
+thread_local std::array<char, 512> tErrnoBuf;
+
+const char* getErrnoMessage(int savedErrno) {
+  return strerror_r(savedErrno, tErrnoBuf.data(), tErrnoBuf.size());
+}
 
 pid_t gettid() { return static_cast<pid_t>(::syscall(SYS_gettid)); }
 
@@ -38,10 +43,10 @@ bool isMainThread() { return tid() == getpid(); }
 void sleepUsec(int64_t usec) {
   struct timespec ts = {0, 0};
   ts.tv_sec =
-      static_cast<time_t>(usec / detail::Timestamp::kMicroSecondsPerSecond);
-  ts.tv_nsec = static_cast<long>(
-      usec % detail::Timestamp::kMicroSecondsPerSecond * 1000);
-  ::nanosleep(&ts, NULL);
+      static_cast<time_t>(usec / Unix::Timestamp::kMicroSecondsPerSecond);
+  ts.tv_nsec =
+      static_cast<long>(usec % Unix::Timestamp::kMicroSecondsPerSecond * 1000);
+  ::nanosleep(&ts, nullptr);
 }
 
 CountDownLatch::CountDownLatch(int count)

@@ -4,13 +4,13 @@
 #include <cstring>
 
 #include "detail/Buffer.h"
+#include "log/LogStream.h"
 #include "unix/Time.h"
-namespace rnet {
+namespace rnet::log {
 
 // 每条日志创建一个logger对象然后丢弃,在析构函数中写入异步日志后端
 // 意味着写入后端操作不能有异常
 class Logger {
-  using LogStream = detail::LogStream;
   using Timestamp = Unix::Timestamp;
 
  public:
@@ -139,7 +139,7 @@ class Fmt  // : noncopyable
 #define LOG_SYSERR rnet::Logger(__FILE__, __LINE__, false).stream()
 #define LOG_SYSFATAL rnet::Logger(__FILE__, __LINE__, true).stream()
 
-const char* getErrnoMessage(int savedErrno);
+// const char* getErrnoMessage(int savedErrno);
 
 // Taken from glog/logging.h
 //
@@ -158,4 +158,4 @@ T* CheckNotNull(Logger::SourceFile file, int line, const char* names, T* ptr) {
   return ptr;
 }
 
-}  // namespace rnet
+}  // namespace rnet::log

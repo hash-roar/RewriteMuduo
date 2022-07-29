@@ -5,8 +5,8 @@
 #include <optional>
 #include <string>
 
-#include "Common.h"
-#include "File.h"
+#include "base/Common.h"
+#include "file/File.h"
 
 namespace rnet::detail {
 class LogFile : noncopyable {
@@ -35,7 +35,7 @@ class LogFile : noncopyable {
   time_t startOfPeriod_;
   time_t lastRoll_;
   time_t lastFlush_;
-  std::unique_ptr<AppendFile> file_;
+  std::unique_ptr<File::AppendFile> file_;
 
   const static int kRollPerSeconds_ = 60 * 60 * 24;
 };

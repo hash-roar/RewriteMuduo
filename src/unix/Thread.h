@@ -8,7 +8,7 @@
 #include <mutex>
 #include <thread>
 
-#include "Common.h"
+#include "base/Common.h"
 namespace rnet {
 
 namespace Thread {
@@ -17,6 +17,7 @@ extern thread_local char tTreadIdString[32];
 extern thread_local int tTreadIdStringLen;
 extern thread_local const char* tThreadName;
 
+const char* getErrnoMessage(int savedErrno);
 void getTidAndCache();
 
 inline int tid() {
@@ -42,7 +43,7 @@ bool isMainThread();
 
 void sleepUsec(int64_t usec);  // for testing
 
-class CountDownLatch : detail::noncopyable {
+class CountDownLatch : noncopyable {
  public:
   explicit CountDownLatch(int count);
 
@@ -58,7 +59,7 @@ class CountDownLatch : detail::noncopyable {
   int count_;
 };
 
-class Thread : detail::noncopyable {
+class Thread : noncopyable {
  public:
   using ThreadFunc = std::function<void()>;
 

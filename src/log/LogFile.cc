@@ -1,9 +1,13 @@
 #include "LogFile.h"
 
+#include <bits/types/FILE.h>
+
 #include <cassert>
 #include <mutex>
 #include <optional>
-#include "File.h"
+
+#include "file/File.h"
+#include "unix/ProcssInfo.h"
 
 using namespace rnet;
 using namespace rnet::detail;
@@ -73,7 +77,7 @@ bool LogFile::rollFile() {
     lastRoll_ = now;
     lastFlush_ = now;
     startOfPeriod_ = start;
-    file_.reset(new detail::AppendFile(filename));
+    file_.reset(new File::AppendFile(filename));
     return true;
   }
   return false;
@@ -91,10 +95,10 @@ std::string LogFile::getLogFileName(const std::string& basename, time_t* now) {
   strftime(timebuf, sizeof timebuf, ".%Y%m%d-%H%M%S.", &tm);
   filename += timebuf;
 
-  filename += ProcessInfo::hostname();
+  filename += Unix::hostname();
 
   char pidbuf[32];
-  snprintf(pidbuf, sizeof pidbuf, ".%d", ProcessInfo::pid());
+  snprintf(pidbuf, sizeof pidbuf, ".%d", Unix::pid());
   filename += pidbuf;
 
   filename += ".log";

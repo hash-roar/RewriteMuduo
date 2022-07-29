@@ -1,12 +1,17 @@
-#include "ProcssInfo.h"
+#include "unix/ProcssInfo.h"
 
 #include <dirent.h>
 #include <pwd.h>
+#include <sys/resource.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #include <cassert>
 #include <string>
 #include <string_view>
+
+#include "file/File.h"
+#include "unix/Thread.h"
 
 namespace rnet::Unix {
 thread_local int tNumOpenedFiles = 0;
@@ -106,21 +111,21 @@ std::string_view Unix::procname(const std::string& stat) {
 
 std::string Unix::procStatus() {
   std::string result;
-  FileUtil::readFile("/proc/self/status", 65536, &result);
+  File::readFile("/proc/self/status", 65536, &result);
   return result;
 }
 
 std::string Unix::procStat() {
   std::string result;
-  FileUtil::readFile("/proc/self/stat", 65536, &result);
+  File::readFile("/proc/self/stat", 65536, &result);
   return result;
 }
 
 std::string Unix::threadStat() {
   char buf[64];
-  snprintf(buf, sizeof buf, "/proc/self/task/%d/stat", CurrentThread::tid());
+  snprintf(buf, sizeof buf, "/proc/self/task/%d/stat", Thread::tid());
   std::string result;
-  FileUtil::readFile(buf, 65536, &result);
+  File::readFile(buf, 65536, &result);
   return result;
 }
 
@@ -135,9 +140,9 @@ std::string Unix::exePath() {
 }
 
 int Unix::openedFiles() {
-  t_numOpenedFiles = 0;
+  tNumOpenedFiles = 0;
   scanDir("/proc/self/fd", fdDirFilter);
-  return t_numOpenedFiles;
+  return tNumOpenedFiles;
 }
 
 int Unix::maxOpenFiles() {
@@ -149,16 +154,16 @@ int Unix::maxOpenFiles() {
   }
 }
 
-Unix::CpuTime Unix::cpuTime() {
-  Unix::CpuTime t;
-  struct tms tms;
-  if (::times(&tms) >= 0) {
-    const double hz = static_cast<double>(clockTicksPerSecond());
-    t.userSeconds = static_cast<double>(tms.tms_utime) / hz;
-    t.systemSeconds = static_cast<double>(tms.tms_stime) / hz;
-  }
-  return t;
-}
+// Unix::CpuTime Unix::cpuTime() {
+//   Unix::CpuTime t;
+//   struct tms tms;
+//   if (::times(&tms) >= 0) {
+//     const double hz = static_cast<double>(clockTicksPerSecond());
+//     t.userSeconds = static_cast<double>(tms.tms_utime) / hz;
+//     t.systemSeconds = static_cast<double>(tms.tms_stime) / hz;
+//   }
+//   return t;
+// }
 
 int Unix::numThreads() {
   int result = 0;
@@ -172,9 +177,9 @@ int Unix::numThreads() {
 
 std::vector<pid_t> Unix::threads() {
   std::vector<pid_t> result;
-  t_pids = &result;
+  tPids = &result;
   scanDir("/proc/self/task", taskDirFilter);
-  t_pids = NULL;
+  tPids = nullptr;
   std::sort(result.begin(), result.end());
   return result;
 }

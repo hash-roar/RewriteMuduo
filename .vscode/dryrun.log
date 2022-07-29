@@ -1,0 +1,6 @@
+make --dry-run --keep-going --print-directory
+make: Entering directory '/home/onecho/local/github/RewriteMuodu'
+make: Leaving directory '/home/onecho/local/github/RewriteMuodu'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+

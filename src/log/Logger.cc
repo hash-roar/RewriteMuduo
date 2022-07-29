@@ -1,6 +1,6 @@
-#include "Logger.h"
+#include "log/Logger.h"
 
-#include <assert.h>
+#include <cassert>
 #include <bits/types/time_t.h>
 
 #include <array>
@@ -8,12 +8,11 @@
 #include <cstdio>
 #include <cstring>
 
-#include "detail/Thread.h"
+#include "unix/Thread.h"
 
 using namespace rnet;
-using namespace rnet::detail;
 
-namespace rnet {
+namespace rnet::log {
 // 线程内缓存
 thread_local std::array<char, 512> tErrnoBuf;
 thread_local std::array<char, 512> tTimeBuf;
@@ -67,7 +66,9 @@ Logger::OutputFunc GlobalOutput = WriteStdout;
 Logger::FlushFunc GlobalFlush = FlushStdout;
 // TimeZone GlobalLogTimeZone;
 
-}  // namespace rnet
+} // namespace rnet::log
+
+using namespace rnet::log;
 
 Logger::Impl::Impl(LogLevel level, int savedErrno, const SourceFile& file,
                    int line)

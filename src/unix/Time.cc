@@ -25,7 +25,7 @@ std::string Timestamp::toString() const {
 
 std::string Timestamp::toFormattedString(bool showMicroseconds) const {
   char buf[64] = {0};
-  time_t seconds =
+  auto seconds =
       static_cast<time_t>(microSecondsSinceEpoch_ / kMicroSecondsPerSecond);
   struct tm tm_time;
   gmtime_r(&seconds, &tm_time);
@@ -46,7 +46,7 @@ std::string Timestamp::toFormattedString(bool showMicroseconds) const {
 
 Timestamp Timestamp::now() {
   struct timeval tv;
-  gettimeofday(&tv, NULL);
+  gettimeofday(&tv, nullptr);
   int64_t seconds = tv.tv_sec;
   return Timestamp(seconds * kMicroSecondsPerSecond + tv.tv_usec);
 }

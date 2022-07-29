@@ -1,12 +1,11 @@
-#include "Buffer.h"
+#include "log/LogStream.h"
 
 #include <algorithm>
 #include <cinttypes>
-#include <type_traits>
 
-using namespace rnet;
-using namespace rnet::detail;
-namespace rnet {
+#include "file/Buffer.h"
+
+namespace rnet::log {
 const char digits[] = "9876543210123456789";
 const char* const zero = digits + 9;
 static_assert(sizeof(digits) == 20, "wrong number of digits");
@@ -48,8 +47,6 @@ size_t convertHex(char buf[], uintptr_t value) {
 
   return p - buf;
 }
-
-}  // namespace rnet
 
 std::string formatSI(int64_t s) {
   auto n = static_cast<double>(s);
@@ -157,12 +154,6 @@ void LogStream::staticCheck() {
                 "kMaxNumericSize is large enough");
 }
 
-template <int SIZE>
-const char* SizedBuffer<SIZE>::debugString() {
-  *cur_ = '\0';
-  return data_;
-}
-
 template <typename T>
 void LogStream::formatInteger(T v) {
   if (buffer_.avail() >= kMaxNumericSize) {
@@ -221,3 +212,5 @@ LogStream& LogStream::operator<<(double v) {
   }
   return *this;
 }
+
+}  // namespace rnet::log
