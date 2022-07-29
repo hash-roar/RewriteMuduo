@@ -22,6 +22,7 @@ int main() {
     fmt::print("thread id:{}\n", Thread::tid());
   });
   t.start();
+  Thread::tThreadName = "main thread";
 
   fmt::print("main thread get thread id:{}\n", t.gettid());
   fmt::print("create thread num:{}\n", Thread::Thread::numCreated());

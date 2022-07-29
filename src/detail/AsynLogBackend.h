@@ -48,7 +48,7 @@ class AsyncLogging : noncopyable {
   std::atomic<bool> running_{false};
   const std::string basename_;
   const off_t rollSize_;
-  std::thread thread_;
+  rnet::Thread::Thread thread_;
   rnet::Thread::CountDownLatch latch_;
   std::mutex mutex_;
   std::condition_variable cond_;

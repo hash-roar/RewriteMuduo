@@ -47,7 +47,7 @@ target_include_directories(rmuduotest
     PRIVATE
     ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(rmuduotest  fmt)
-target_link_libraries(rmuduotest  rmuduo)
+target_link_libraries(rmuduotest  rnet)
 
 
 # set(CXX_FLAGS

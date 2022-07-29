@@ -7,6 +7,7 @@ words:
   - glog
   - Grisu
   - Loitsch
+  - pidbuf
   - SYSFATAL
   - zonefile
 ignoreWords: []
