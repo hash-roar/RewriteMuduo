@@ -14,7 +14,9 @@ words:
   - optlen
   - peeraddr
   - pidbuf
+  - sshthresh
   - SYSFATAL
+  - unrecovered
   - VALGRIND
   - zonefile
 ignoreWords: []

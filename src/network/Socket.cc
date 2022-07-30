@@ -6,6 +6,7 @@
 #include <cstdio>
 
 #include "log/Logger.h"
+#include "network/NetAddress.h"
 #include "network/SocketOps.h"
 
 using namespace rnet;
@@ -13,6 +14,7 @@ using namespace rnet::Network;
 
 Socket::~Socket() {
   if (sockfd_ != NonValidSocketFd) {
+    LOG_ERROR << "close socket:" << sockfd_ << "\n";
     Sockets::close(sockfd_);
   }
 }

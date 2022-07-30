@@ -18,6 +18,11 @@ class noncopyable {
   noncopyable() = default;
   ~noncopyable() = default;
 };
+class copyable {
+ protected:
+  copyable() = default;
+  ~copyable() = default;
+};
 
 // 显式表明隐式转换
 template <typename To, typename From>
