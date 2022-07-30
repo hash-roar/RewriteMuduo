@@ -3,12 +3,19 @@ ignorePaths: []
 dictionaryDefinitions: []
 dictionaries: []
 words:
+  - connfd
+  - desctiptor
   - Florian
   - glog
   - Grisu
+  - iovcnt
+  - lmit
   - Loitsch
+  - optlen
+  - peeraddr
   - pidbuf
   - SYSFATAL
+  - VALGRIND
   - zonefile
 ignoreWords: []
 import: []
