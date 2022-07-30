@@ -3,7 +3,7 @@
 
 #include <arpa/inet.h>
 
-namespace rnet::Network::Socket {
+namespace rnet::Network::Sockets {
 ///
 /// Creates a non-blocking socket file descriptor,
 /// abort if any error.
@@ -12,6 +12,8 @@ int createNonblockingOrDie(sa_family_t family);
 int connect(int sockfd, const struct sockaddr* addr);
 void bindOrDie(int sockfd, const struct sockaddr* addr);
 void listenOrDie(int sockfd);
+
+// 获取非阻塞套接字
 int accept(int sockfd, struct sockaddr_in6* addr);
 ssize_t read(int sockfd, void* buf, size_t count);
 ssize_t readv(int sockfd, const struct iovec* iov, int iovcnt);
