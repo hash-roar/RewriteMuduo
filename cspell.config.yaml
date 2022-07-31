@@ -5,6 +5,7 @@ dictionaries: []
 words:
   - connfd
   - desctiptor
+  - epollfd
   - Florian
   - glog
   - Grisu

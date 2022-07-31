@@ -1,1 +1,4 @@
-namespace rnet::network {}  // namespace rnet::network
+#pragma once
+namespace rnet::Network {
+class EventLoop {};
+}  // namespace rnet::network
