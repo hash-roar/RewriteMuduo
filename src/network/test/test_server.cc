@@ -18,7 +18,7 @@
 
 using namespace rnet;
 using namespace rnet::Network;
-void process_request(Socket socket) {
+void process_request(Socket &socket) {
   std::cout << "sock fd:" << socket.fd() << "\n";
 }
 
@@ -43,8 +43,8 @@ int main() {
 
     fmt::print("accept peer addr:{}", peeraddr.toIpPort());
     Socket client_sock{fd};
-    // auto func = std::bind(process_request, std::move(client_sock));
-    // func();
+    auto func = std::bind(process_request, std::move(client_sock));
+    func();
 
     std::thread thread(process_request, std::move(client_sock));
     thread.join();
