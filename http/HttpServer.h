@@ -7,6 +7,10 @@
 
 #include "ConnectionManager.h"
 namespace http {
+
+struct ServerConfig {
+  std::string document_root_;
+};
 class HttpServer {
  public:
   HttpServer(const HttpServer&) = delete;
@@ -22,7 +26,7 @@ class HttpServer {
 
   // void handleRequest();
   void handleSignal();
-  std::string document_root_;
+  ServerConfig server_config_;
   asio::io_context io_context_;
   asio::ip::tcp::acceptor accepter_;
   asio::signal_set signal_;

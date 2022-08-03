@@ -11,7 +11,6 @@
 #include "HttpConnection.h"
 
 using namespace http;
-using SocketType = asio::ip::tcp::socket;
 namespace http {
 HttpServer::HttpServer(const std::string& addr, const std::string port,
                        const std::string document_root)
@@ -19,7 +18,7 @@ HttpServer::HttpServer(const std::string& addr, const std::string port,
       accepter_(io_context_),
       signal_(io_context_),
       connections_(),
-      document_root_(document_root) {
+      server_config_{document_root} {
   signal_.add(SIGINT);
   signal_.add(SIGTERM);
 
