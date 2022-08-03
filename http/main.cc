@@ -1,10 +1,7 @@
-#include <fmt/core.h>
-
-#include <asio/read.hpp>
-
-#include "HttpServer.h"
+#include <math.h>
+#include <spdlog/spdlog.h>
 
 int main() {
-  fmt::print("hello world");
+  SPDLOG_ERROR("error");
   return -1;
 }

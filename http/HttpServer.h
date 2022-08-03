@@ -18,6 +18,11 @@ class HttpServer {
   void run();
 
  private:
+  void accept();
+
+  // void handleRequest();
+  void handleSignal();
+  std::string document_root_;
   asio::io_context io_context_;
   asio::ip::tcp::acceptor accepter_;
   asio::signal_set signal_;
