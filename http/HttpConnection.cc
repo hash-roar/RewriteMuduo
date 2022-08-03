@@ -6,14 +6,48 @@
 #include <asio/ip/tcp.hpp>
 #include <cstddef>
 #include <cstdio>
+#include <filesystem>
 #include <iostream>
+#include <optional>
+#include <string>
+#include <string_view>
 #include <system_error>
 #include <utility>
 
 #include "ConnectionManager.h"
 #include "HttpParser.h"
+#include "HttpResponse.h"
 #include "HttpServer.h"
 
+namespace fs = std::filesystem;
+namespace {
+constexpr size_t kMaxFileBufferSize = 1024 * 126;
+
+enum class FsError {
+  NOT_FOUND,
+  NONE,
+  PERMISSION_OUT,
+};
+
+bool isValidatePath(std::string_view path) {
+  if (path.empty() || path[0] != '/' || path.find("..") != std::string::npos) {
+    return false;
+  }
+  return true;
+}
+
+std::optional<std::string> getFileExtension(std::string_view path) {
+  return {};
+}
+
+std::pair<std::size_t, FsError> fileSize(std::string_view path) {
+  fs::path fs_path{path};
+  if (!fs::exists(path)) {
+    return {0, FsError::NOT_FOUND};
+  }
+  return {fs::file_size(fs_path), FsError::NONE};
+}
+}  // namespace
 namespace http {
 HttpConnection::HttpConnection(SocketType socket, ConnectionManager& manager,
                                ServerConfig& config)
@@ -69,6 +103,23 @@ void HttpConnection::write() {
       });
 }
 
-void HttpConnection::handleRequest() {}
+void HttpConnection::handleRequest() {
+  std::string path;
+  if (!decodeUri(request_.uri(), path) || !isValidatePath(path)) {
+    response_ = HttpResponse::buildResponse(HttpResponse::BAD_REQUEST);
+    return;
+  }
+
+  if (path[path.size() - 1] == '/') {
+    path += "index.html";
+  }
+
+  auto [file_size, result] = fileSize(path);
+  if (result != FsError::NONE) {
+    // TODO
+  }
+
+  
+}
 
 }  // namespace http
