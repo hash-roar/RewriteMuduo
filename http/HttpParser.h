@@ -1,6 +1,7 @@
 #pragma once
 
 #include <climits>
+#include <string>
 #include <string_view>
 #include <utility>
 
@@ -9,7 +10,7 @@ namespace http {
 class HttpParser {
  public:
   enum Result { INTERMIDIATE, FINISH, ERROR };
-  HttpParser() ;
+  HttpParser();
   ~HttpParser();
 
   void reset();
@@ -21,12 +22,12 @@ class HttpParser {
   Result parseOneLine(HttpRequest& req, std::string_view line);
   enum ParseState {
     START,
-    METHOD_LINE_OPEN,
+    // METHOD_LINE_OPEN,
     LINE_OPEN,
-    EMPTY_LINE_OPEN,
-    SUCCESS,
+    // EMPTY_LINE_OPEN,
+    // SUCCESS,
   };
-
+  std::string temp_line_;
   ParseState state_;
 };
 }  // namespace http
