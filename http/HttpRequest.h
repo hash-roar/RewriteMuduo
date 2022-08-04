@@ -15,9 +15,10 @@ class HttpRequest {
   auto& version() { return version_; }
   auto& method() { return method_; }
   auto& uri() { return uri_; }
-  void addHeader(const Header& header) {
-    headers_[header.first] = header.second;
+  void addHeader(Header header) {
+    headers_[std::move(header.first)] = std::move(header.second);
   }
+
  private:
   std::string version_;
   std::string method_;

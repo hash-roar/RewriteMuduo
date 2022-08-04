@@ -18,6 +18,7 @@
 #include "HttpParser.h"
 #include "HttpResponse.h"
 #include "HttpServer.h"
+#include "file/File.h"
 
 namespace fs = std::filesystem;
 namespace {
@@ -64,6 +65,7 @@ void HttpConnection::read() {
   socket_.async_read_some(
       asio::buffer(rbuffer_),
       [this, selfptr](std::error_code ec, std::size_t read_bytes) {
+        // TODO handle methods which carrying loads of bytes
         if (!ec) {
           auto [result, itr] = request_parser_.parse(
               request_, rbuffer_.data(), rbuffer_.data() + read_bytes);
@@ -103,6 +105,7 @@ void HttpConnection::write() {
       });
 }
 
+// handle get method
 void HttpConnection::handleRequest() {
   std::string path;
   if (!decodeUri(request_.uri(), path) || !isValidatePath(path)) {
@@ -114,12 +117,33 @@ void HttpConnection::handleRequest() {
     path += "index.html";
   }
 
+  path = server_config_.document_root_ + path;
+
   auto [file_size, result] = fileSize(path);
   if (result != FsError::NONE) {
     // TODO
+    switch (result) {
+      case FsError::NOT_FOUND: {
+        response_ = HttpResponse::buildResponse(HttpResponse::NOT_FOUND);
+        return;
+      }
+      default: {
+        response_ =
+            HttpResponse::buildResponse(HttpResponse::INTERNAL_SERVER_ERROR);
+        return;
+      }
+    }
   }
+  response_.content.reserve(file_size);
+  rnet::File::readFile(path, response_.content.size(),
+                       response_.content.data());
+  response_.headers.emplace_back("Content-Length", std::to_string(file_size));
+  response_.headers.emplace_back("Content-Type", "txt/html");
+}
 
-  
+bool HttpConnection::decodeUri(const std::string& uri, std::string& out) {
+  // TODO
+  return true;
 }
 
 }  // namespace http

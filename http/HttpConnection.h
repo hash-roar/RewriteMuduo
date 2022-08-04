@@ -30,7 +30,7 @@ class HttpConnection : std::enable_shared_from_this<HttpConnection> {
   void write();
 
   void handleRequest();
-  bool decodeUri(const std::string uri, std::string& out);
+  bool decodeUri(const std::string& uri, std::string& out);
 
   ServerConfig& server_config_;
   ConnectionManager& connection_manager_;
