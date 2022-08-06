@@ -186,7 +186,7 @@ void HttpConnection::handleRequest() {
     }
   }
   response_.content.reserve(file_size);
-  rnet::File::readFile(path, response_.content.size(),
+  rnet::File::readFile(path, response_.content.capacity(),
                        response_.content.data());
   response_.headers.emplace_back("Content-Length", std::to_string(file_size));
   response_.headers.emplace_back("Content-Type", "txt/html");

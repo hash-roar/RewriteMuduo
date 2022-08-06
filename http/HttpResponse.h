@@ -25,9 +25,11 @@ struct HttpResponse {
     SERVICE_UNAVAILABLE = 503
   };
   using Header = std::pair<std::string, std::string>;
-  Status status_;
+  Status status_{OK};
   std::vector<Header> headers;
   std::string content;
+  std::string head_line_;
+  std::string rep_header_;
   std::vector<asio::const_buffer> toBuffers();
 
   HttpResponse static buildResponse(Status);
