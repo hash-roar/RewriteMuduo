@@ -7,6 +7,9 @@
 
 #include "HttpRequest.h"
 namespace http {
+
+// for safety more better way to parse is 
+// to parse header one byte one time
 class HttpParser {
  public:
   enum Result { INTERMIDIATE, FINISH, ERROR };

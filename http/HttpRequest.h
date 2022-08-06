@@ -1,6 +1,9 @@
 #pragma once
 
+#include <optional>
 #include <string>
+#include <string_view>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -16,13 +19,23 @@ class HttpRequest {
   auto& method() { return method_; }
   auto& uri() { return uri_; }
   void addHeader(Header header) {
-    headers_[std::move(header.first)] = std::move(header.second);
+    // perfect forward three times?
+    headers_.insert(std::move(header));
   }
+
+  std::optional<std::string> getHeader(const std::string& key) {
+    auto itr = headers_.find(key);
+    return itr == headers_.end() ? std::nullopt
+                                 : std::make_optional(itr->second);
+  }
+
+  void addBuffer(std::string_view buffer) { read_buffer_.append(buffer); }
 
  private:
   std::string version_;
   std::string method_;
   std::string uri_;
+  std::string read_buffer_;
   HeaderMap headers_;
 };
 }  // namespace http
