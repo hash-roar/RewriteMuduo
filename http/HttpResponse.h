@@ -31,6 +31,7 @@ struct HttpResponse {
   std::string head_line_;
   std::string rep_header_;
   std::vector<asio::const_buffer> toBuffers();
+  std::string statusToString(Status) const;
 
   HttpResponse static buildResponse(Status);
 };

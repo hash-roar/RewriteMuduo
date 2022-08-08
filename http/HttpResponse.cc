@@ -1,9 +1,16 @@
 #include "HttpResponse.h"
 
 #include <asio/buffer.hpp>
+#include <map>
 #include <string>
 #include <vector>
 
+namespace {
+using namespace http;
+// using namespace HttpResponse;
+const std::map<HttpResponse::Status, std::string> status_map{
+    {HttpResponse::OK, "OK"}};
+}  // namespace
 namespace http {
 HttpResponse HttpResponse::buildResponse(Status) {
   HttpResponse rep{};
@@ -22,5 +29,8 @@ std::vector<asio::const_buffer> HttpResponse::toBuffers() {
                      "\r\n\r\n");
   return {{rep_header_.data(), rep_header_.length()},
           {content.data(), content.length()}};
+}
+std::string HttpResponse::statusToString(HttpResponse::Status status) const {
+  return status_map.at(status);  // throw at not_found
 }
 }  // namespace http
