@@ -5,7 +5,13 @@ dictionaries: []
 words:
   - connfd
   - desctiptor
+  - EPOLLERR
   - epollfd
+  - EPOLLHUP
+  - EPOLLIN
+  - EPOLLOUT
+  - EPOLLPRI
+  - EPOLLRDHUP
   - Florian
   - glog
   - Grisu
