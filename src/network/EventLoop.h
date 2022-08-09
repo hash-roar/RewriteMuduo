@@ -103,7 +103,7 @@ class EventLoop : noncopyable {
 
  private:
   void abortNotInLoopThread();
-  void handleRead();  // waked up
+  void handleWakeUp();  // waked up
   void doPendingFunctors();
 
   void printActiveChannels() const;  // DEBUG

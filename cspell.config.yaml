@@ -12,6 +12,8 @@ words:
   - EPOLLOUT
   - EPOLLPRI
   - EPOLLRDHUP
+  - eventfd
+  - Eventfd
   - Florian
   - glog
   - Grisu
@@ -23,6 +25,7 @@ words:
   - pidbuf
   - sshthresh
   - SYSFATAL
+  - timerfd
   - unrecovered
   - VALGRIND
   - zonefile
