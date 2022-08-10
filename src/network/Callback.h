@@ -17,4 +17,12 @@ using HighWaterMarkCallback =
 // the data has been read to (buf, len)
 using MessageCallback = std::function<void(const TcpConnectionPtr &, Buffer *,
                                            rnet::Unix::Timestamp)>;
+
+using MessageCallback =
+    std::function<void(const TcpConnectionPtr &, Buffer *, Unix::Timestamp)>;
+
+void defaultConnectionCallback(const TcpConnectionPtr &conn);
+void defaultMessageCallback(const TcpConnectionPtr &conn, Buffer *buffer,
+                            Unix::Timestamp receiveTime);
+
 }  // namespace rnet
