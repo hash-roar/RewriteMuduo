@@ -1,4 +1,6 @@
 #pragma once
+#include <sys/epoll.h>
+
 #include <map>
 #include <vector>
 
@@ -18,7 +20,7 @@ class Epoll : noncopyable {
   Unix::Timestamp poll(int timeoutMs, ChannelList* activeChannels);
   void updateChannel(Channel* channel);
   void removeChannel(Channel* channel);
-  bool hasChannel(Channel* channel);
+  bool hasChannel(Channel* channel) const;
   static Epoll newPoller(EventLoop* loop);
 
   void assertInLoopThread() const { ownerLoop_->assertInLoopThread(); }
@@ -26,7 +28,7 @@ class Epoll : noncopyable {
  private:
   using ChannelMap = std::map<int, Channel*>;
   using EventList = std::vector<struct epoll_event>;
-  
+
   static const int kInitEventListSize = 16;
   static const char* operationToString(int op);
 

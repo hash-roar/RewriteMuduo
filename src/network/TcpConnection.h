@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <netinet/tcp.h>
 
 #include "base/Common.h"
 #include "file/ConnBuffer.h"

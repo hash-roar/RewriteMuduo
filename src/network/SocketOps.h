@@ -39,4 +39,4 @@ struct sockaddr_in6 getLocalAddr(int sockfd);
 struct sockaddr_in6 getPeerAddr(int sockfd);
 bool isSelfConnect(int sockfd);
 
-}  // namespace rnet::Network::Socket
+} // namespace rnet::Network::Sockets
