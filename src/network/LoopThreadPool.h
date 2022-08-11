@@ -11,18 +11,20 @@ class EventLoopThread;
 
 class EventLoopThreadPool : noncopyable {
  public:
-  using ThreadInitCallback = std::function<void (EventLoop *)>;
+  //事件回调,注册到loop thread中
+  using ThreadInitCallback = std::function<void(EventLoop*)>;
 
   EventLoopThreadPool(EventLoop* baseLoop, const std::string& nameArg);
   ~EventLoopThreadPool();
+  // 设置io线程数量,默认为0 即io都在主线程做
   void setThreadNum(int numThreads) { numThreads_ = numThreads; }
   void start(const ThreadInitCallback& cb = ThreadInitCallback());
 
-  // valid after calling start()
-  /// round-robin
+  // 暴露给tcp server用于分发tcp connection任务,
+  // 在start调用后才能调用,否则断言失败程序崩溃
   EventLoop* getNextLoop();
 
-  /// with the same hash code, it will always return the same EventLoop
+  // 简单对hash code 取余选取loop
   EventLoop* getLoopForHash(size_t hashCode);
 
   std::vector<EventLoop*> getAllLoops();

@@ -5,6 +5,7 @@
 
 #include "network/EventLoop.h"
 namespace rnet::Network {
+// 二段式构造,初始化时io loop还没有生成,需要手动start
 EventLoopThread::EventLoopThread(const ThreadInitCallback& cb,
                                  const std::string& name)
     : loop_(nullptr),
@@ -16,6 +17,7 @@ EventLoopThread::EventLoopThread(const ThreadInitCallback& cb,
 
 EventLoopThread::~EventLoopThread() {
   exiting_ = true;
+  //一般来说类不会正常析构,否则意味着程序退出
   if (loop_ != nullptr)  // not 100% race-free, eg. threadFunc could be running
                          // callback_.
   {
@@ -30,6 +32,8 @@ EventLoop* EventLoopThread::startLoop() {
   assert(!thread_.started());
   thread_.start();
 
+  // 这里可以用倒计时
+  // 用条件变量是等待线程启动并完成loop的初始化,否则loop可能返回nullptr
   EventLoop* loop = nullptr;
   {
     std::unique_lock lock{mutex_};
@@ -52,8 +56,9 @@ void EventLoopThread::threadFunc() {
     loop_ = &loop;
     cond_.notify_one();
   }
-
+  //开启事件循环等待io
   loop.loop();
+  // 程序一般不会走到这里
   // assert(exiting_);
   std::lock_guard lock(mutex_);
   loop_ = nullptr;

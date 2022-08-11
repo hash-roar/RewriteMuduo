@@ -6,6 +6,8 @@
 #include "network/LoopThread.h"
 
 namespace rnet::Network {
+
+// 默认只有main loop
 EventLoopThreadPool::EventLoopThreadPool(EventLoop* baseLoop,
                                          const std::string& nameArg)
     : baseLoop_(baseLoop),
@@ -14,6 +16,7 @@ EventLoopThreadPool::EventLoopThreadPool(EventLoop* baseLoop,
       numThreads_(0),
       next_(0) {}
 
+// loop thread 析构会自动join线程
 EventLoopThreadPool::~EventLoopThreadPool() = default;
 
 void EventLoopThreadPool::start(const ThreadInitCallback& cb) {
@@ -34,6 +37,8 @@ void EventLoopThreadPool::start(const ThreadInitCallback& cb) {
   }
 }
 
+// 如果只有base loop 就返回
+// 如果有工作线程,将从返回工作线程loop
 EventLoop* EventLoopThreadPool::getNextLoop() {
   baseLoop_->assertInLoopThread();
   assert(started_);

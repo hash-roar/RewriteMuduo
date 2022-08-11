@@ -19,7 +19,10 @@ words:
   - Florian
   - glog
   - Grisu
+  - hostport
   - iovcnt
+  - libev
+  - libev's
   - lmit
   - Loitsch
   - optlen
