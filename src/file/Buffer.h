@@ -4,8 +4,8 @@
 
 #include "base/Common.h"
 namespace rnet::File {
-constexpr int kLargeSize = 1024 * 4;
-constexpr int kSmallSize = 1024 * 1000;
+constexpr int kSmallSize = 1024 * 4;
+constexpr int kLargeSize = 1024 * 1000;
 
 // 对数组的简单包装,缓冲区在对象内
 template <int SIZE>

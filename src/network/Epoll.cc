@@ -11,8 +11,9 @@ const int kAdded = 1;
 const int kDeleted = 2;
 }  // namespace
 
-using namespace rnet::Network;
 using namespace rnet::Unix;
+
+namespace rnet::Network {
 
 Epoll::Epoll(EventLoop* loop)
     : ownerLoop_(loop),
@@ -74,6 +75,26 @@ void Epoll::fillActiveChannels(int numEvents,
   }
 }
 
+void Epoll::update(int operation, Channel* channel) {
+  struct epoll_event event;
+  memZero(&event, sizeof event);
+  event.events = channel->events();
+  event.data.ptr = channel;
+  int fd = channel->fd();
+  LOG_TRACE << "epoll_ctl op = " << operationToString(operation)
+            << " fd = " << fd << " event = { " << channel->eventsToString()
+            << " }";
+  if (::epoll_ctl(epollfd_, operation, fd, &event) < 0) {
+    if (operation == EPOLL_CTL_DEL) {
+      LOG_SYSERR << "epoll_ctl op =" << operationToString(operation)
+                 << " fd =" << fd;
+    } else {
+      LOG_SYSFATAL << "epoll_ctl op =" << operationToString(operation)
+                   << " fd =" << fd;
+    }
+  }
+}
+
 void Epoll::updateChannel(Channel* channel) {
   assertInLoopThread();
   const int index = channel->index();
@@ -92,7 +113,11 @@ void Epoll::updateChannel(Channel* channel) {
     }
 
     channel->set_index(kAdded);
+
+    // segment fault here
+    // this->update(EPOLL_CTL_ADD, channel);
     update(EPOLL_CTL_ADD, channel);
+
   } else {
     // update existing one with EPOLL_CTL_MOD/DEL
     int fd = channel->fd();
@@ -127,26 +152,6 @@ void Epoll::removeChannel(Channel* channel) {
   channel->set_index(kNew);
 }
 
-void Epoll::update(int operation, Channel* channel) {
-  struct epoll_event event;
-  memZero(&event, sizeof event);
-  event.events = channel->events();
-  event.data.ptr = channel;
-  int fd = channel->fd();
-  LOG_TRACE << "epoll_ctl op = " << operationToString(operation)
-            << " fd = " << fd << " event = { " << channel->eventsToString()
-            << " }";
-  if (::epoll_ctl(epollfd_, operation, fd, &event) < 0) {
-    if (operation == EPOLL_CTL_DEL) {
-      LOG_SYSERR << "epoll_ctl op =" << operationToString(operation)
-                 << " fd =" << fd;
-    } else {
-      LOG_SYSFATAL << "epoll_ctl op =" << operationToString(operation)
-                   << " fd =" << fd;
-    }
-  }
-}
-
 const char* Epoll::operationToString(int op) {
   switch (op) {
     case EPOLL_CTL_ADD:
@@ -160,3 +165,5 @@ const char* Epoll::operationToString(int op) {
       return "Unknown Operation";
   }
 }
+
+}  // namespace rnet::Network
