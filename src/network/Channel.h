@@ -7,6 +7,11 @@ namespace rnet::Network {
 
 class EventLoop;
 
+// channel 没有套接字的值语义,epoll与tcp connection之间的交换
+// 交互过程为 tcp connection通过eventloop将事件注册到epoll中,然后epoll事件来临时
+// epoll 将对应事件添加到activeChannels集合中.然后event
+// loop负责调用每个channel的handleEvent函数 在这个函数中,tcp
+// connection注册的回调被调用,从而用户注册的回调也被调用
 class Channel : noncopyable {
  public:
   using EventCallback = std::function<void()>;

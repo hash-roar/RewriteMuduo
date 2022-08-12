@@ -54,6 +54,7 @@ class TcpServer : noncopyable {
 
   /// Set connection callback.
   /// Not thread safe.
+  //
   void setConnectionCallback(const ConnectionCallback& cb) {
     connectionCallback_ = cb;
   }
@@ -85,8 +86,11 @@ class TcpServer : noncopyable {
   std::shared_ptr<EventLoopThreadPool> threadPool_;
   // 连接发生变化时回调函数
   ConnectionCallback connectionCallback_;
+  //消息到来时(消息读到buffer中后)回调
   MessageCallback messageCallback_;
+  // 写完成,即output缓冲区中数据发送完毕
   WriteCompleteCallback writeCompleteCallback_;
+  // io线程初始化完成后的回调
   ThreadInitCallback threadInitCallback_;
   std::atomic_int32_t started_{0};
   // always in loop thread

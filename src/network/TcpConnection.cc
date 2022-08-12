@@ -296,6 +296,8 @@ void TcpConnection::handleRead(Timestamp receiveTime) {
   ssize_t n = inputBuffer_.readFd(channel_->fd(), &savedErrno);
   if (n > 0) {
     messageCallback_(shared_from_this(), &inputBuffer_, receiveTime);
+    // 当对方请求关闭连接时,epoll返回epollin | EPOLLRDHUP
+    // 此时服务端直接关闭连接即可
   } else if (n == 0) {
     handleClose();
   } else {
@@ -315,10 +317,13 @@ void TcpConnection::handleWrite() {
       //如果发送缓存已经为空,停止关注读事件,否则会busy loop
       if (outputBuffer_.readableBytes() == 0) {
         channel_->disableWriting();
+        // 直接将回调入栈,而不是直接调用
         if (writeCompleteCallback_) {
           loop_->queueInLoop(
               std::bind(writeCompleteCallback_, shared_from_this()));
         }
+        // 在关注写事件时shutdown会被忽略,因此此时要检测是否已经调用过shutdown了,
+        // 将没有成功调用的shutdown补回来
         if (state_ == kDisconnecting) {
           shutdownInLoop();
         }

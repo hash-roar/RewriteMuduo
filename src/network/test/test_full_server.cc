@@ -1,6 +1,8 @@
 
 #include <fmt/core.h>
 
+#include <memory>
+
 #include "file/ConnBuffer.h"
 #include "log/Logger.h"
 #include "network/Callback.h"
@@ -23,6 +25,7 @@ int main() {
   EventLoop loop;
   auto listen_addr = InetAddress("127.0.0.1", 8080);
   TcpServer server(&loop, listen_addr, "test_server");
+  server.setThreadNum(20);
   server.setMessageCallback(outputString);
   loop.runEvery(2.5, [] { fmt::print("hello\n"); });
   loop.runAfter(2.2, [] { fmt::print("this is------------>\n"); });
@@ -30,5 +33,3 @@ int main() {
   loop.loop();
   return 0;
 }
-
-
