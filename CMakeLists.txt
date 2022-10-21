@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.1)
 project(rmuduotest)
 add_subdirectory(src)
 add_subdirectory(http)
-
+add_subdirectory(test)
 
 set(CXX_FLAGS
  -g
