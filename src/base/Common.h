@@ -1,9 +1,12 @@
 #pragma once
 
 // 一些最基础的组件
+#include <cassert>
 #include <chrono>
 #include <cstddef>
 #include <cstring>
+#include <stdexcept>
+
 namespace rnet {
 
 using SysTimep_t = std::chrono::time_point<std::chrono::system_clock>;
@@ -31,5 +34,24 @@ inline To implicit_cast(From const &f) {
 }
 // 将缓冲区置零
 inline void memZero(void *p, size_t n) { memset(p, 0, n); }
+
+#pragma once
+
+#define RNET_ASSERT(expr, message) assert((expr) && (message))
+
+#define UNREACHABLE(message) throw std::logic_error(message)
+
+// Macros to disable copying and moving
+#define DISALLOW_COPY(cname)                             \
+  cname(const cname &) = delete;            /* NOLINT */ \
+  cname &operator=(const cname &) = delete; /* NOLINT */
+
+#define DISALLOW_MOVE(cname)                        \
+  cname(cname &&) = delete;            /* NOLINT */ \
+  cname &operator=(cname &&) = delete; /* NOLINT */
+
+#define DISALLOW_COPY_AND_MOVE(cname) \
+  DISALLOW_COPY(cname);               \
+  DISALLOW_MOVE(cname);
 
 }  // namespace rnet

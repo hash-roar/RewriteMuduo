@@ -71,7 +71,6 @@ class Thread : noncopyable {
   void join();  // return pthread_join()
 
   bool started() const { return started_; }
-  // pthread_t pthreadId() const { return pthreadId_; }
   pid_t gettid() const { return tid_; }
   const std::string& name() const { return name_; }
 

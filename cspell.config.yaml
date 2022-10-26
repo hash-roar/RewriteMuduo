@@ -25,10 +25,12 @@ words:
   - libev's
   - lmit
   - Loitsch
+  - noncopyable
   - optlen
   - peeraddr
   - pidbuf
   - prependable
+  - rnet
   - sshthresh
   - SYSFATAL
   - timerfd

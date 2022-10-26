@@ -6,7 +6,11 @@
 #include <unistd.h>
 
 #include <cassert>
+#include <cstddef>
 #include <cstdio>
+#include <exception>
+#include <filesystem>
+#include <fstream>
 #include <string>
 #include <string_view>
 
@@ -52,7 +56,7 @@ size_t AppendFile::write(const char* logline, size_t len) {
   return ::fwrite_unlocked(logline, 1, len, fp_);
 }
 
-ReadSmallFile::ReadSmallFile(std::string_view filename)
+FileReader::FileReader(std::string_view filename)
     : fd_(::open(std::string{filename}.c_str(), O_RDONLY | O_CLOEXEC)),
       err_(0) {
   buf_[0] = '\0';
@@ -61,18 +65,40 @@ ReadSmallFile::ReadSmallFile(std::string_view filename)
   }
 }
 
-ReadSmallFile::~ReadSmallFile() {
+FileReader::~FileReader() {
   if (fd_ >= 0) {
     ::close(fd_);  // FIXME: check EINTR
   }
 }
 
+std::string FileReader::getFileContent(std::string_view file_name) {
+  namespace fs = std::filesystem;
+  constexpr size_t kReadBufSize = 1024 * 5;
+  fs::path path{file_name};
+
+  // open file
+  std::ifstream f;
+  f.open(path);
+  if (!f.is_open()) {
+    throw std::exception{};
+  }
+
+  size_t file_size = fs::file_size(path);
+  std::string content(file_size, '0');
+  size_t cur = 0;
+  size_t read_num = (file_size - cur) / kReadBufSize;
+  while (read_num > 0) {
+    f.read(content.data() + cur, read_num);
+  }
+
+  return content;
+}
 // return errno
 template <typename String>
-int ReadSmallFile::readToString(int maxSize, String* content, int64_t* fileSize,
-                                int64_t* modifyTime, int64_t* createTime) {
+int FileReader::readToString(int maxSize, String* content, int64_t* fileSize,
+                             int64_t* modifyTime, int64_t* createTime) {
   static_assert(sizeof(off_t) == 8, "_FILE_OFFSET_BITS = 64");
-  assert(content != NULL);
+  assert(content != nullptr);
   int err = err_;
   if (fd_ >= 0) {
     content->clear();
@@ -115,7 +141,7 @@ int ReadSmallFile::readToString(int maxSize, String* content, int64_t* fileSize,
   return err;
 }
 
-int ReadSmallFile::readToBuffer(int* size) {
+int FileReader::readToBuffer(int* size) {
   int err = err_;
   if (fd_ >= 0) {
     ssize_t n = ::pread(fd_, buf_, sizeof(buf_) - 1, 0);
@@ -132,7 +158,7 @@ int ReadSmallFile::readToBuffer(int* size) {
 }
 
 template int File::readFile(std::string_view filename, int maxSize,
-                      std::string* content, int64_t*, int64_t*, int64_t*);
+                            std::string* content, int64_t*, int64_t*, int64_t*);
 
-template int ReadSmallFile::readToString(int maxSize, std::string* content, int64_t*,
-                                         int64_t*, int64_t*);
+template int FileReader::readToString(int maxSize, std::string* content,
+                                      int64_t*, int64_t*, int64_t*);

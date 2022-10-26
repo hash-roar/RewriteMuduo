@@ -6,6 +6,8 @@
 #include <cstring>
 #include <string>
 #include <string_view>
+#include <vector>
+
 #include "network/Endian.h"
 namespace rnet::File {
 class Buffer {
