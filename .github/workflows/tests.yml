@@ -1,0 +1,17 @@
+name: test-ci
+on:
+  push:
+    branches:
+     - dev
+    tags:
+     - v*.*.*
+
+jobs:
+  TestDev:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/heads/dev')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Set up 
