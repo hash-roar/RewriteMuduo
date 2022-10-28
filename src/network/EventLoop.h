@@ -14,7 +14,7 @@ namespace rnet::Network {
 class Epoll;
 class Channel;
 class TimerQueue;
-class EventLoop : noncopyable {
+class EventLoop : Noncopyable {
  public:
   // typedef std::function<void()> Functor;
   using Functor = std::function<void()>;
@@ -27,32 +27,32 @@ class EventLoop : noncopyable {
   ///
   /// Must be called in the same thread as creation of the object.
   ///
-  void loop();
+  void Loop();
 
   /// Quits loop.
   ///
   /// This is not 100% thread safe, if you call through a raw pointer,
   /// better to call through shared_ptr<EventLoop> for 100% safety.
-  void quit();
+  void Quit();
 
   ///
   /// Time when poll returns, usually means data arrival.
   ///
-  Unix::Timestamp pollReturnTime() const { return pollReturnTime_; }
+  Unix::Timestamp PollReturnTime() const { return pollReturnTime_; }
 
-  int64_t iteration() const { return iteration_; }
+  int64_t Iteration() const { return iteration_; }
 
   /// Runs callback immediately in the loop thread.
   /// It wakes up the loop, and run the cb.
   /// If in the same loop thread, cb is run within the function.
   /// Safe to call from other threads.
-  void runInLoop(Functor cb);
+  void RunInLoop(Functor cb);
   /// Queues callback in the loop thread.
   /// Runs after finish pooling.
   /// Safe to call from other threads.
-  void queueInLoop(Functor cb);
+  void QueueInLoop(Functor cb);
 
-  size_t queueSize() const;
+  size_t QueueSize() const;
 
   // timers
 
@@ -60,53 +60,53 @@ class EventLoop : noncopyable {
   /// Runs callback at 'time'.
   /// Safe to call from other threads.
   ///
-  TimerId runAt(Unix::Timestamp time, TimerCallback cb);
+  network::TimerId RunAt(Unix::Timestamp time, network::TimerCallback cb);
   ///
   /// Runs callback after @c delay seconds.
   /// Safe to call from other threads.
   ///
-  TimerId runAfter(double delay, TimerCallback cb);
+  network::TimerId RunAfter(double delay, network::TimerCallback cb);
   ///
   /// Runs callback every @c interval seconds.
   /// Safe to call from other threads.
   ///
-  TimerId runEvery(double interval, TimerCallback cb);
+  network::TimerId RunEvery(double interval, network::TimerCallback cb);
   ///
   /// Cancels the timer.
   /// Safe to call from other threads.
   ///
-  void cancel(TimerId timerId);
+  void Cancel(network::TimerId timerId);
 
   // internal usage
-  void wakeup();
-  void updateChannel(Channel* channel);
-  void removeChannel(Channel* channel);
-  bool hasChannel(Channel* channel);
+  void Wakeup();
+  void UpdateChannel(Channel* channel);
+  void RemoveChannel(Channel* channel);
+  bool HasChannel(Channel* channel);
 
   // pid_t threadId() const { return threadId_; }
-  void assertInLoopThread() {
-    if (!isInLoopThread()) {
-      abortNotInLoopThread();
+  void AssertInLoopThread() {
+    if (!IsInLoopThread()) {
+      AbortNotInLoopThread();
     }
   }
-  bool isInLoopThread() const { return threadId_ == Thread::tid(); }
+  bool IsInLoopThread() const { return threadId == thread::Tid(); }
   // bool callingPendingFunctors() const { return callingPendingFunctors_; }
-  bool eventHandling() const { return eventHandling_; }
+  bool EventHandling() const { return eventHandling_; }
 
-  void setContext(const std::any& context) { context_ = context; }
+  void SetContext(const std::any& context) { context_ = context; }
 
-  const std::any& getContext() const { return context_; }
+  const std::any& GetContext() const { return context_; }
 
-  std::any* getMutableContext() { return &context_; }
+  std::any* GetMutableContext() { return &context_; }
 
-  static EventLoop* getEventLoopOfCurrentThread();
+  static EventLoop* GetEventLoopOfCurrentThread();
 
  private:
-  void abortNotInLoopThread();
-  void handleWakeUp();  // waked up
-  void doPendingFunctors();
+  void AbortNotInLoopThread();
+  void HandleWakeUp();  // waked up
+  void DoPendingFunctors();
 
-  void printActiveChannels() const;  // DEBUG
+  void PrintActiveChannels() const;  // DEBUG
 
   using ChannelList = std::vector<Channel*>;
 
@@ -115,7 +115,7 @@ class EventLoop : noncopyable {
   bool eventHandling_;          /* atomic */
   bool callingPendingFunctors_; /* atomic */
   int64_t iteration_;
-  const pid_t threadId_;
+  const pid_t threadId;
   Unix::Timestamp pollReturnTime_;
   std::unique_ptr<Epoll> poller_;
   std::unique_ptr<TimerQueue> timerQueue_;

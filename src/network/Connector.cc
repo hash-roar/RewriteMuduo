@@ -4,7 +4,7 @@
 #include "network/EventLoop.h"
 #include "unix/Thread.h"
 
-namespace rnet::Network {
+namespace rnet::network {
 const int Connector::kMaxRetryDelayMs;
 
 Connector::Connector(EventLoop* loop, const InetAddress& serverAddr)
@@ -21,13 +21,13 @@ Connector::~Connector() {
   assert(!channel_);
 }
 
-void Connector::start() {
+void Connector::Start() {
   connect_ = true;
   loop_->runInLoop(std::bind(&Connector::startInLoop, this));  // FIXME: unsafe
 }
 
-void Connector::startInLoop() {
-  loop_->assertInLoopThread();
+void Connector::StartInLoop() {
+  loop_->AssertInLoopThread();
   assert(state_ == kDisconnected);
   if (connect_) {
     connect();
@@ -36,14 +36,14 @@ void Connector::startInLoop() {
   }
 }
 
-void Connector::stop() {
+void Connector::Stop() {
   connect_ = false;
   loop_->queueInLoop(std::bind(&Connector::stopInLoop, this));  // FIXME: unsafe
   // FIXME: cancel timer
 }
 
-void Connector::stopInLoop() {
-  loop_->assertInLoopThread();
+void Connector::StopInLoop() {
+  loop_->AssertInLoopThread();
   if (state_ == kConnecting) {
     setState(kDisconnected);
     int sockfd = removeAndResetChannel();
@@ -51,7 +51,7 @@ void Connector::stopInLoop() {
   }
 }
 
-void Connector::connect() {
+void Connector::Connect() {
   int sockfd = Sockets::createNonblockingOrDie(serverAddr_.family());
   int ret = Sockets::connect(sockfd, serverAddr_.getSockAddr());
   int savedErrno = (ret == 0) ? 0 : errno;
@@ -90,15 +90,15 @@ void Connector::connect() {
   }
 }
 
-void Connector::restart() {
-  loop_->assertInLoopThread();
+void Connector::Restart() {
+  loop_->AssertInLoopThread();
   setState(kDisconnected);
   retryDelayMs_ = kInitRetryDelayMs;
   connect_ = true;
   startInLoop();
 }
 
-void Connector::connecting(int sockfd) {
+void Connector::Connecting(int sockfd) {
   setState(kConnecting);
   assert(!channel_);
   channel_.reset(new Channel(loop_, sockfd));
@@ -112,19 +112,19 @@ void Connector::connecting(int sockfd) {
   channel_->enableWriting();
 }
 
-int Connector::removeAndResetChannel() {
+int Connector::RemoveAndResetChannel() {
   channel_->disableAll();
   channel_->remove();
-  int sockfd = channel_->fd();
+  int sockfd = channel_->Fd();
   // Can't reset channel_ here, because we are inside Channel::handleEvent
   loop_->queueInLoop(
       std::bind(&Connector::resetChannel, this));  // FIXME: unsafe
   return sockfd;
 }
 
-void Connector::resetChannel() { channel_.reset(); }
+void Connector::ResetChannel() { channel_.reset(); }
 
-void Connector::handleWrite() {
+void Connector::HandleWrite() {
   LOG_TRACE << "Connector::handleWrite " << state_;
 
   if (state_ == kConnecting) {
@@ -151,7 +151,7 @@ void Connector::handleWrite() {
   }
 }
 
-void Connector::handleError() {
+void Connector::HandleError() {
   LOG_ERROR << "Connector::handleError state=" << state_;
   if (state_ == kConnecting) {
     int sockfd = removeAndResetChannel();
@@ -161,12 +161,12 @@ void Connector::handleError() {
   }
 }
 
-void Connector::retry(int sockfd) {
+void Connector::Retry(int  /*sockfd*/) {
   Sockets::close(sockfd);
   setState(kDisconnected);
   if (connect_) {
     LOG_INFO << "Connector::retry - Retry connecting to "
-             << serverAddr_.toIpPort() << " in " << retryDelayMs_
+             << serverAddr_.ToIpPort() << " in " << retryDelayMs_
              << " milliseconds. ";
     loop_->runAfter(retryDelayMs_ / 1000.0,
                     std::bind(&Connector::startInLoop, shared_from_this()));

@@ -10,8 +10,3 @@ add_library(rnet ${FILE_SRCS} ${UNIX_SRCS} ${LOG_SRCS}  ${NETWORK_SRCS})
 
 target_link_libraries(rnet  pthread)
 target_include_directories(rnet PUBLIC ${PROJECT_SOURCE_DIR}/src)
-
-add_subdirectory(file)
-add_subdirectory(log)
-add_subdirectory(network)
-add_subdirectory(unix)

@@ -3,7 +3,7 @@
 
 #include "base/Common.h"
 
-namespace rnet::Network {
+namespace rnet::network {
 class InetAddress;
 
 ///
@@ -11,60 +11,60 @@ class InetAddress;
 ///
 /// It closes the sockfd when destruct.
 /// It's thread safe, all operations are down to OS.
-class Socket : noncopyable {
-  static const int NonValidSocketFd = -1;
+class Socket : Noncopyable {
+  static const int nonValidSocketFd = -1;
 
  public:
   explicit Socket(int sockfd) : sockfd_(sockfd) {}
 
   Socket(Socket&& other) {
     sockfd_ = other.sockfd_;
-    other.sockfd_ = NonValidSocketFd;
+    other.sockfd_ = nonValidSocketFd;
   }
   void operator=(Socket&& other) {
     sockfd_ = other.sockfd_;
-    other.sockfd_ = NonValidSocketFd;
+    other.sockfd_ = nonValidSocketFd;
   }
   // Socket(Socket&&) // move constructor in C++11
   ~Socket();
 
-  int fd() const { return sockfd_; }
+  int Fd() const { return sockfd_; }
   // return true if success.
-  bool getTcpInfo(struct tcp_info*) const;
-  bool getTcpInfoString(char* buf, int len) const;
+  bool GetTcpInfo(struct tcp_info*) const;
+  bool GetTcpInfoString(char* buf, int len) const;
 
   /// abort if address in use
-  void bindAddress(const InetAddress& localaddr);
+  void BindAddress(const InetAddress& localaddr);
   /// abort if address in use
-  void listen();
+  void Listen();
 
   /// On success, returns a non-negative integer that is
   /// a descriptor for the accepted socket, which has been
   /// set to non-blocking and close-on-exec. *peeraddr is assigned.
   /// On error, -1 is returned, and *peeraddr is untouched.
-  int accept(InetAddress* peeraddr);
+  int Accept(InetAddress* peeraddr);
 
-  void shutdownWrite();
+  void ShutdownWrite();
 
   ///
   /// Enable/disable TCP_NODELAY (disable/enable Nagle's algorithm).
   ///
-  void setTcpNoDelay(bool on);
+  void SetTcpNoDelay(bool on);
 
   ///
   /// Enable/disable SO_REUSEADDR
   ///
-  void setReuseAddr(bool on);
+  void SetReuseAddr(bool on);
 
   ///
   /// Enable/disable SO_REUSEPORT
   ///
-  void setReusePort(bool on);
+  void SetReusePort(bool on);
 
   ///
   /// Enable/disable SO_KEEPALIVE
   ///
-  void setKeepAlive(bool on);
+  void SetKeepAlive(bool on);
 
  private:
   int sockfd_;

@@ -5,7 +5,7 @@
 #include "base/Common.h"
 #include "network/Callback.h"
 #include "network/Channel.h"
-namespace rnet::Network {
+namespace rnet::network {
 class EventLoop;
 class Timer;
 class TimerId;
@@ -14,7 +14,7 @@ class TimerId;
 /// A best efforts timer queue.
 /// No guarantee that the callback will be on time.
 ///
-class TimerQueue : noncopyable {
+class TimerQueue : Noncopyable {
  public:
   explicit TimerQueue(EventLoop* loop);
   ~TimerQueue();
@@ -24,9 +24,9 @@ class TimerQueue : noncopyable {
   /// repeats if @c interval > 0.0.
   ///
   /// Must be thread safe. Usually be called from other threads.
-  TimerId addTimer(TimerCallback cb, Unix::Timestamp when, double interval);
+  TimerId AddTimer(TimerCallback cb, Unix::Timestamp when, double interval);
 
-  void cancel(TimerId timerId);
+  void Cancel(TimerId timerId);
 
  private:
   // FIXME: use unique_ptr<Timer> instead of raw pointers.
@@ -37,19 +37,19 @@ class TimerQueue : noncopyable {
   using ActiveTimer = std::pair<Timer*, int64_t>;
   using ActiveTimerSet = std::set<ActiveTimer>;
 
-  void addTimerInLoop(Timer* timer);
-  void cancelInLoop(TimerId timerId);
+  void AddTimerInLoop(Timer* timer);
+  void CancelInLoop(TimerId timerId);
   // called when timerfd alarms
-  void handleRead();
+  void HandleRead();
   // move out all expired timers
-  std::vector<Entry> getExpired(Unix::Timestamp now);
-  void reset(const std::vector<Entry>& expired, Unix::Timestamp now);
+  std::vector<Entry> GetExpired(Unix::Timestamp now);
+  void Reset(const std::vector<Entry>& expired, Unix::Timestamp now);
 
-  bool insert(Timer* timer);
+  bool Insert(Timer* timer);
 
   EventLoop* loop_;
-  const int timerfd_;
-  Channel timerfdChannel_;
+  const int timerfd;
+  network::Channel timerfdChannel_;
   // Timer list sorted by expiration
   TimerList timers_;
 

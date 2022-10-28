@@ -1,16 +1,13 @@
+#include "network/EventLoop.h"
 #include "network/TimerQueue.h"
-
 #include <sys/timerfd.h>
 #include <unistd.h>
-
 #include <tuple>
-
 #include "log/Logger.h"
-#include "network/EventLoop.h"
-namespace rnet::Network {
+namespace rnet::network {
 namespace detail {
 
-int createTimerfd() {
+int CreateTimerFd() {
   int timerfd = ::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
   if (timerfd < 0) {
     LOG_SYSFATAL << "Failed in timerfd_create";
@@ -18,9 +15,9 @@ int createTimerfd() {
   return timerfd;
 }
 
-struct timespec howMuchTimeFromNow(Unix::Timestamp when) {
-  int64_t microseconds = when.microSecondsSinceEpoch() -
-                         Unix::Timestamp::now().microSecondsSinceEpoch();
+struct timespec HowMuchTimeFromNow(Unix::Timestamp when) {
+  int64_t microseconds = when.MicroSecondsSinceEpoch() -
+                         Unix::Timestamp::Now().MicroSecondsSinceEpoch();
   if (microseconds < 100) {
     microseconds = 100;
   }
@@ -32,24 +29,24 @@ struct timespec howMuchTimeFromNow(Unix::Timestamp when) {
   return ts;
 }
 
-void readTimerfd(int timerfd, Unix::Timestamp now) {
+void ReadTimerfd(int timerfd, Unix::Timestamp now) {
   uint64_t howmany;
   ssize_t n = ::read(timerfd, &howmany, sizeof howmany);
   LOG_TRACE << "TimerQueue::handleRead() " << howmany << " at "
-            << now.toString();
+            << now.ToString();
   if (n != sizeof howmany) {
     LOG_ERROR << "TimerQueue::handleRead() reads " << n
               << " bytes instead of 8";
   }
 }
 
-void resetTimerfd(int timerfd, Unix::Timestamp expiration) {
+void ResetTimerfd(int timerfd, Unix::Timestamp Expiration) {
   // wake up loop by timerfd_settime()
   struct itimerspec newValue;
   struct itimerspec oldValue;
-  memZero(&newValue, sizeof newValue);
-  memZero(&oldValue, sizeof oldValue);
-  newValue.it_value = howMuchTimeFromNow(expiration);
+  MemZero(&newValue, sizeof newValue);
+  MemZero(&oldValue, sizeof oldValue);
+  newValue.it_value = HowMuchTimeFromNow(Expiration);
   int ret = ::timerfd_settime(timerfd, 0, &newValue, &oldValue);
   if (ret) {
     LOG_SYSERR << "timerfd_settime()";
@@ -62,52 +59,52 @@ using namespace detail;
 
 TimerQueue::TimerQueue(EventLoop* loop)
     : loop_(loop),
-      timerfd_(createTimerfd()),
-      timerfdChannel_(loop, timerfd_),
+      timerfd(CreateTimerFd()),
+      timerfdChannel_(loop, timerfd),
       timers_(),
       callingExpiredTimers_(false) {
-  timerfdChannel_.setReadCallback(std::bind(&TimerQueue::handleRead, this));
+  timerfdChannel_.SetReadCallback(std::bind(&::rnet::network::TimerQueue::HandleRead, this));
   // we are always reading the timerfd, we disarm it with timerfd_settime.
-  timerfdChannel_.enableReading();
+  timerfdChannel_.EnableReading();
 }
 
 TimerQueue::~TimerQueue() {
-  timerfdChannel_.disableAll();
-  timerfdChannel_.remove();
-  ::close(timerfd_);
+  timerfdChannel_.DisableAll();
+  timerfdChannel_.Remove();
+  ::close(timerfd);
   // do not remove channel, since we're in EventLoop::dtor();
   for (const Entry& timer : timers_) {
     delete timer.second;
   }
 }
 
-TimerId TimerQueue::addTimer(TimerCallback cb, Unix::Timestamp when,
+TimerId TimerQueue::AddTimer(TimerCallback cb, Unix::Timestamp when,
                              double interval) {
   auto timer = new Timer(std::move(cb), when, interval);
-  loop_->runInLoop(std::bind(&TimerQueue::addTimerInLoop, this, timer));
-  return TimerId(timer, timer->sequence());
+  loop_->RunInLoop(std::bind(&::rnet::network::TimerQueue::AddTimerInLoop, this, timer));
+  return TimerId(timer, timer->Sequence());
 }
 
-void TimerQueue::cancel(TimerId timerId) {
-  loop_->runInLoop(std::bind(&TimerQueue::cancelInLoop, this, timerId));
+void TimerQueue::Cancel(TimerId timerId) {
+  loop_->RunInLoop(std::bind(&::rnet::network::TimerQueue::CancelInLoop, this, timerId));
 }
 
-void TimerQueue::addTimerInLoop(Timer* timer) {
-  loop_->assertInLoopThread();
-  bool earliestChanged = insert(timer);
+void TimerQueue::AddTimerInLoop(Timer* timer) {
+  loop_->AssertInLoopThread();
+  bool earliestChanged = Insert(timer);
 
   if (earliestChanged) {
-    resetTimerfd(timerfd_, timer->expiration());
+    ResetTimerfd(timerfd, timer->Expiration());
   }
 }
 
-void TimerQueue::cancelInLoop(TimerId timerId) {
-  loop_->assertInLoopThread();
+void TimerQueue::CancelInLoop(TimerId timerId) {
+  loop_->AssertInLoopThread();
   assert(timers_.size() == activeTimers_.size());
-  ActiveTimer timer(timerId.timer_, timerId.sequence_);
+  ActiveTimer timer(timerId.timer_, timerId.Sequence_);
   auto itr = activeTimers_.find(timer);
   if (itr != activeTimers_.end()) {
-    size_t n = timers_.erase(Entry(itr->first->expiration(), itr->first));
+    size_t n = timers_.erase(Entry(itr->first->Expiration(), itr->first));
     assert(n == 1);
     delete itr->first;  // FIXME: no delete please
     activeTimers_.erase(itr);
@@ -117,25 +114,25 @@ void TimerQueue::cancelInLoop(TimerId timerId) {
   assert(timers_.size() == activeTimers_.size());
 }
 
-void TimerQueue::handleRead() {
-  loop_->assertInLoopThread();
-  Unix::Timestamp now(Unix::Timestamp::now());
-  readTimerfd(timerfd_, now);
+void TimerQueue::HandleRead() {
+  loop_->AssertInLoopThread();
+  Unix::Timestamp now(Unix::Timestamp::Now());
+  ReadTimerfd(timerfd, now);
 
-  std::vector<Entry> expired = getExpired(now);
+  std::vector<Entry> expired = GetExpired(now);
 
   callingExpiredTimers_ = true;
   cancelingTimers_.clear();
   // safe to callback outside critical section
   for (const Entry& it : expired) {
-    it.second->run();
+    it.second->Run();
   }
   callingExpiredTimers_ = false;
 
-  reset(expired, now);
+  Reset(expired, now);
 }
 
-std::vector<TimerQueue::Entry> TimerQueue::getExpired(Unix::Timestamp now) {
+std::vector<TimerQueue::Entry> TimerQueue::GetExpired(Unix::Timestamp now) {
   assert(timers_.size() == activeTimers_.size());
   std::vector<Entry> expired;
   Entry sentry(now, reinterpret_cast<Timer*>(UINTPTR_MAX));
@@ -145,7 +142,7 @@ std::vector<TimerQueue::Entry> TimerQueue::getExpired(Unix::Timestamp now) {
   timers_.erase(timers_.begin(), end);
 
   for (const Entry& it : expired) {
-    ActiveTimer timer(it.second, it.second->sequence());
+    ActiveTimer timer(it.second, it.second->Sequence());
     size_t n = activeTimers_.erase(timer);
     assert(n == 1);
   }
@@ -154,15 +151,15 @@ std::vector<TimerQueue::Entry> TimerQueue::getExpired(Unix::Timestamp now) {
   return expired;
 }
 
-void TimerQueue::reset(const std::vector<Entry>& expired, Unix::Timestamp now) {
+void TimerQueue::Reset(const std::vector<Entry>& expired, Unix::Timestamp now) {
   Unix::Timestamp nextExpire;
 
   for (const Entry& it : expired) {
-    ActiveTimer timer(it.second, it.second->sequence());
-    if (it.second->repeat() &&
+    ActiveTimer timer(it.second, it.second->Sequence());
+    if (it.second->Repeat() &&
         cancelingTimers_.find(timer) == cancelingTimers_.end()) {
-      it.second->restart(now);
-      insert(it.second);
+      it.second->Restart(now);
+      Insert(it.second);
     } else {
       // FIXME move to a free list
       delete it.second;  // FIXME: no delete please
@@ -170,19 +167,19 @@ void TimerQueue::reset(const std::vector<Entry>& expired, Unix::Timestamp now) {
   }
 
   if (!timers_.empty()) {
-    nextExpire = timers_.begin()->second->expiration();
+    nextExpire = timers_.begin()->second->Expiration();
   }
 
-  if (nextExpire.valid()) {
-    resetTimerfd(timerfd_, nextExpire);
+  if (nextExpire.Valid()) {
+    ResetTimerfd(timerfd, nextExpire);
   }
 }
 
-bool TimerQueue::insert(Timer* timer) {
-  loop_->assertInLoopThread();
+bool TimerQueue::Insert(Timer* timer) {
+  loop_->AssertInLoopThread();
   assert(timers_.size() == activeTimers_.size());
   bool earliestChanged = false;
-  Unix::Timestamp when = timer->expiration();
+  Unix::Timestamp when = timer->Expiration();
   auto it = timers_.begin();
   if (it == timers_.end() || when < it->first) {
     earliestChanged = true;
@@ -194,7 +191,7 @@ bool TimerQueue::insert(Timer* timer) {
   }
   {
     auto [_ignore, success] =
-        activeTimers_.insert(ActiveTimer(timer, timer->sequence()));
+        activeTimers_.insert(ActiveTimer(timer, timer->Sequence()));
     assert(success);
   }
 

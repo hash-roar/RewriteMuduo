@@ -14,148 +14,129 @@ using namespace rnet;
 
 namespace rnet::log {
 // 线程内缓存
-thread_local std::array<char, 512> tErrnoBuf;
-thread_local std::array<char, 512> tTimeBuf;
-thread_local time_t tLastSecond;
+thread_local std::array< char, 512 > tErrnoBuf;
+thread_local std::array< char, 512 > tTimeBuf;
+thread_local time_t                  tLastSecond;
 
-const char* getErrnoMessage(int savedErrno) {
-  return strerror_r(savedErrno, tErrnoBuf.data(), tErrnoBuf.size());
+const char* GetErrnoMessage( int savedErrno ) {
+  return strerror_r( savedErrno, tErrnoBuf.data(), tErrnoBuf.size() );
 }
 
-Logger::LogLevel initLogLevel() {
-  if (::getenv("LOG_TRACE"))
-    return Logger::TRACE;
-  else if (::getenv("LOG_DEBUG"))
-    return Logger::DEBUG;
-  else
-    return Logger::INFO;
+enum Logger::LogLevel InitLogLevel() {
+  if ( ::getenv( "LOG_TRACE" ) ) {
+    return Logger::trace;
+  }
+  else if ( ::getenv( "LOG_DEBUG" ) ) {
+    return Logger::debug;
+  }
+  else {
+    return Logger::info;
+  }
 }
 
-Logger::LogLevel GlobalLogLevel = initLogLevel();
-constexpr const char* LogLevelName[Logger::NUM_LOG_LEVELS] = {
-    "TRACE ", "DEBUG ", "INFO  ", "WARN  ", "ERROR ", "FATAL ",
+enum Logger::LogLevel globalLogLevel                       = InitLogLevel();
+constexpr const char* logLevelName[ Logger::numLogLevels ] = {
+  "TRACE ", "DEBUG ", "INFO  ", "WARN  ", "ERROR ", "FATAL ",
 };
 
 class T {
- public:
-  T(const char* str, unsigned len) : str_(str), len_(len) {
-    assert(strlen(str) == len_);
+public:
+  T( const char* str, unsigned len ) : str_( str ), len( len ) {
+    assert( strlen( str ) == len );
   }
 
-  const char* str_;
-  const unsigned len_;
+  const char*    str_;
+  const unsigned len;
 };
 
-inline LogStream& operator<<(LogStream& s, T v) {
-  s.append(v.str_, v.len_);
+inline LogStream& operator<<( LogStream& s, T v ) {
+  s.Append( v.str_, v.len );
   return s;
 }
 
-inline LogStream& operator<<(LogStream& s, const Logger::SourceFile& v) {
-  s.append(v.data_, v.size_);
+inline LogStream& operator<<( LogStream& s, const Logger::SourceFile& v ) {
+  s.Append( v.data_, v.size_ );
   return s;
 }
 
-void WriteStdout(const char* buf, size_t len) {
-  size_t write_len = fwrite(buf, 1, len, stdout);
+void WriteStdout( const char* buf, size_t len ) {
+  size_t writeLen = fwrite( buf, 1, len, stdout );
 }
 
-void FlushStdout() { fflush(stdout); }
+void FlushStdout() {
+  fflush( stdout );
+}
 
-Logger::OutputFunc GlobalOutput = WriteStdout;
-Logger::FlushFunc GlobalFlush = FlushStdout;
+Logger::OutputFunc globalOutput = WriteStdout;
+Logger::FlushFunc  globalFlush  = FlushStdout;
 // TimeZone GlobalLogTimeZone;
 
 }  // namespace rnet::log
 
 using namespace rnet::log;
 
-
-
-Logger::Impl::Impl(LogLevel level, int savedErrno, const SourceFile& file,
-                   int line)
-    : time_(Timestamp::now()),
-      stream_(),
-      level_(level),
-      line_(line),
-      basename_(file) {
-  formatTime();
-  Thread::tid();
-  stream_ << T(Thread::tidString(), Thread::tidStringLength());
-  stream_ << T(LogLevelName[level], 6);
-  if (savedErrno != 0) {
-    stream_ << getErrnoMessage(savedErrno) << " (errno=" << savedErrno << ") ";
+Logger::Impl::Impl( LogLevel level, int savedErrno, const SourceFile& file, int line ) : time_( Timestamp::Now() ), stream_(), level_( level ), line_( line ), basename_( file ) {
+  FormatTime();
+  thread::Tid();
+  stream_ << T( thread::TidString(), thread::TidStringLength() );
+  stream_ << T( logLevelName[ level ], 6 );
+  if ( savedErrno != 0 ) {
+    stream_ << GetErrnoMessage( savedErrno ) << " (errno=" << savedErrno << ") ";
   }
 }
 
-void Logger::Impl::formatTime() {
-  int64_t microSecondsSinceEpoch = time_.microSecondsSinceEpoch();
-  time_t seconds = static_cast<time_t>(microSecondsSinceEpoch /
-                                       Timestamp::kMicroSecondsPerSecond);
-  int microseconds = static_cast<int>(microSecondsSinceEpoch %
-                                      Timestamp::kMicroSecondsPerSecond);
-  if (seconds != tLastSecond) {
+void Logger::Impl::FormatTime() {
+  int64_t microSecondsSinceEpoch = time_.MicroSecondsSinceEpoch();
+  time_t  seconds                = static_cast< time_t >( microSecondsSinceEpoch / Timestamp::kMicroSecondsPerSecond );
+  int     microseconds           = static_cast< int >( microSecondsSinceEpoch % Timestamp::kMicroSecondsPerSecond );
+  if ( seconds != tLastSecond ) {
     tLastSecond = seconds;
-    struct tm tm_time;
-    // if (GlobalLogTimeZone.valid()) {
-    //   tm_time = GlobalLogTimeZone.toLocalTime(seconds);
-    // } else {
-    //   ::gmtime_r(&seconds, &tm_time);  // FIXME TimeZone::fromUtcTime
-    // }
-    ::gmtime_r(&seconds, &tm_time);  // FIXME TimeZone::fromUtcTime
+    struct tm tmTime;
+    ::gmtime_r( &seconds, &tmTime );  // FIXME TimeZone::fromUtcTime
 
-    int len =
-        snprintf(tTimeBuf.data(), tTimeBuf.size(), "%4d%02d%02d %02d:%02d:%02d",
-                 tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
-                 tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec);
-    assert(len == 17);
-    (void)len;
+    int len = snprintf( tTimeBuf.data(), tTimeBuf.size(), "%4d%02d%02d %02d:%02d:%02d", tmTime.tm_year + 1900, tmTime.tm_mon + 1, tmTime.tm_mday, tmTime.tm_hour, tmTime.tm_min, tmTime.tm_sec );
+    assert( len == 17 );
+    ( void )len;
   }
 
-  // if (GlobalLogTimeZone.valid()) {
-  //   Fmt us(".%06d ", microseconds);
-  //   assert(us.length() == 8);
-  //   stream_ << T(tTimeBuf.data(), 17) << T(us.data(), 8);
-  // } else {
-  //   Fmt us(".%06dZ ", microseconds);
-  //   assert(us.length() == 9);
-  //   stream_ << T(tTimeBuf.data(), 17) << T(us.data(), 9);
-  // }
-  Fmt us(".%06dZ ", microseconds);
-  assert(us.length() == 9);
-  stream_ << T(tTimeBuf.data(), 17) << T(us.data(), 9);
+  Fmt us( ".%06dZ ", microseconds );
+  assert( us.Length() == 9 );
+  stream_ << T( tTimeBuf.data(), 17 ) << T( us.Data(), 9 );
 }
 
-void Logger::Impl::finish() {
+void Logger::Impl::Finish() {
   stream_ << " - " << basename_ << ':' << line_ << '\n';
 }
 
-Logger::Logger(SourceFile file, int line) : impl_(INFO, 0, file, line) {}
+Logger::Logger( SourceFile file, int line ) : impl_( info, 0, file, line ) {}
 
-Logger::Logger(SourceFile file, int line, LogLevel level, const char* func)
-    : impl_(level, 0, file, line) {
+Logger::Logger( SourceFile file, int line, enum LogLevel level, const char* func ) : impl_( level, 0, file, line ) {
   impl_.stream_ << func << ' ';
 }
 
-Logger::Logger(SourceFile file, int line, LogLevel level)
-    : impl_(level, 0, file, line) {}
+Logger::Logger( SourceFile file, int line, enum LogLevel level ) : impl_( level, 0, file, line ) {}
 
-Logger::Logger(SourceFile file, int line, bool toAbort)
-    : impl_(toAbort ? FATAL : ERROR, errno, file, line) {}
+Logger::Logger( SourceFile file, int line, bool toAbort ) : impl_( toAbort ? fatal : error, errno, file, line ) {}
 
 Logger::~Logger() {
-  impl_.finish();
-  const LogStream::Buffer& buf(stream().buffer());
-  GlobalOutput(buf.data(), buf.length());
-  if (impl_.level_ == FATAL) {
-    GlobalFlush();
+  impl_.Finish();
+  const LogStream::Buffer& buf( Stream().GetBuffer() );
+  globalOutput( buf.Data(), buf.Length() );
+  if ( impl_.level_ == fatal ) {
+    globalFlush();
     abort();
   }
 }
-void Logger::setLogLevel(Logger::LogLevel level) { GlobalLogLevel = level; }
+void Logger::SetLogLevel( enum Logger::LogLevel level ) {
+  globalLogLevel = level;
+}
 
-void Logger::setOutput(OutputFunc out) { GlobalOutput = out; }
+void Logger::SetOutput( OutputFunc out ) {
+  globalOutput = out;
+}
 
-void Logger::setFlush(FlushFunc flush) { GlobalFlush = flush; }
+void Logger::SetFlush( FlushFunc flush ) {
+  globalFlush = flush;
+}
 
 // void Logger::setTimeZone(const TimeZone& tz) { GlobalLogTimeZone = tz; }

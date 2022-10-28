@@ -5,34 +5,34 @@
 
 #include "Time.h"
 namespace rnet::Unix {
-pid_t pid();
-std::string pidString();
-uid_t uid();
-std::string username();
-uid_t euid();
-Timestamp startTime();
-int clockTicksPerSecond();
-int pageSize();
-bool isDebugBuild();  // constexpr
+pid_t Pid();
+std::string PidString();
+uid_t Uid();
+std::string Username();
+uid_t Euid();
+Timestamp StartTime();
+int ClockTicksPerSecond();
+int PageSize();
+bool IsDebugBuild();  // constexpr
 
-std::string hostname();
-std::string procname();
-std::string_view procname(const std::string& stat);
+std::string Hostname();
+std::string Procname();
+std::string_view Procname(const std::string& stat);
 
 /// read /proc/self/status
-std::string procStatus();
+std::string ProcStatus();
 
 /// read /proc/self/stat
-std::string procStat();
+std::string ProcStat();
 
 /// read /proc/self/task/tid/stat
-std::string threadStat();
+std::string ThreadStat();
 
 /// readlink /proc/self/exe
-std::string exePath();
+std::string ExePath();
 
-int openedFiles();
-int maxOpenFiles();
+int OpenedFiles();
+int MaxOpenFiles();
 
 struct CpuTime {
   double userSeconds;
@@ -40,10 +40,10 @@ struct CpuTime {
 
   CpuTime() : userSeconds(0.0), systemSeconds(0.0) {}
 
-  double total() const { return userSeconds + systemSeconds; }
+  double Total() const { return userSeconds + systemSeconds; }
 };
-CpuTime cpuTime();
+CpuTime CpuTime();
 
-int numThreads();
-std::vector<pid_t> threads();
+int NumThreads();
+std::vector<pid_t> Threads();
 }  // namespace rnet::Unix

@@ -1,3 +1,4 @@
+#include "network/EventLoop.h"
 #include "network/Acceptor.h"
 
 #include <fcntl.h>
@@ -8,49 +9,48 @@
 #include <cassert>
 
 #include "log/Logger.h"
-#include "network/EventLoop.h"
 #include "network/NetAddress.h"
 #include "network/SocketOps.h"
-namespace rnet::Network {
+namespace rnet::network {
 Acceptor::Acceptor(EventLoop* loop, const InetAddress& listenAddr,
                    bool reuseport)
     : loop_(loop),
-      acceptSocket_(Sockets::createNonblockingOrDie(listenAddr.family())),
-      acceptChannel_(loop, acceptSocket_.fd()),
+      acceptSocket_(sockets::CreateNonblockingOrDie(listenAddr.Family())),
+      acceptChannel_(loop, acceptSocket_.Fd()),
       listening_(false),
       idleFd_(::open("/dev/null", O_RDONLY | O_CLOEXEC)) {
   assert(idleFd_ >= 0);
-  acceptSocket_.setReuseAddr(true);
-  acceptSocket_.setReusePort(reuseport);
-  acceptSocket_.bindAddress(listenAddr);
-  acceptChannel_.setReadCallback(std::bind(&Acceptor::handleRead, this));
+  acceptSocket_.SetReuseAddr(true);
+  acceptSocket_.SetReusePort(reuseport);
+  acceptSocket_.BindAddress(listenAddr);
+  acceptChannel_.SetReadCallback(std::bind(&::rnet::network::Acceptor::HandleRead, this));
 }
 
 Acceptor::~Acceptor() {
-  acceptChannel_.disableAll();
-  acceptChannel_.remove();
+  acceptChannel_.DisableAll();
+  acceptChannel_.Remove();
   ::close(idleFd_);
 }
 
-void Acceptor::listen() {
-  loop_->assertInLoopThread();
+void Acceptor::Listen() {
+  loop_->AssertInLoopThread();
   listening_ = true;
-  acceptSocket_.listen();
-  acceptChannel_.enableReading();
+  acceptSocket_.Listen();
+  acceptChannel_.EnableReading();
 }
 
-void Acceptor::handleRead() {
-  loop_->assertInLoopThread();
+void Acceptor::HandleRead() {
+  loop_->AssertInLoopThread();
   InetAddress peerAddr;
   // FIXME loop until no more
-  int connfd = acceptSocket_.accept(&peerAddr);
+  int connfd = acceptSocket_.Accept(&peerAddr);
   if (connfd >= 0) {
-    // string hostport = peerAddr.toIpPort();
+    // string hostport = peerAddr.ToIpPort();
     // LOG_TRACE << "Accepts of " << hostport;
     if (newConnectionCallback_) {
       newConnectionCallback_(connfd, peerAddr);
     } else {
-      Sockets::close(connfd);
+      sockets::Close(connfd);
     }
   } else {
     LOG_SYSERR << "in Acceptor::handleRead";
@@ -59,7 +59,7 @@ void Acceptor::handleRead() {
     // By Marc Lehmann, author of libev.
     if (errno == EMFILE) {
       ::close(idleFd_);
-      idleFd_ = ::accept(acceptSocket_.fd(), nullptr, nullptr);
+      idleFd_ = ::accept(acceptSocket_.Fd(), nullptr, nullptr);
       ::close(idleFd_);
       idleFd_ = ::open("/dev/null", O_RDONLY | O_CLOEXEC);
     }

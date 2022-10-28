@@ -4,24 +4,24 @@
 #include "base/Common.h"
 #include "network/Channel.h"
 #include "network/Socket.h"
-namespace rnet::Network {
+namespace rnet::network {
 class EventLoop;
 class InetAddress;
-class Acceptor : noncopyable {
+class Acceptor : Noncopyable {
  public:
   using NewConnectionCallback = std::function<void(int, const InetAddress&)>;
 
   Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport);
   ~Acceptor();
-  void setNewConnectionCallback(const NewConnectionCallback& cb) {
+  void SetNewConnectionCallback(const NewConnectionCallback& cb) {
     newConnectionCallback_ = cb;
   }
-  void listen();
+  void Listen();
 
-  bool listening() const { return listening_; }
+  bool Listening() const { return listening_; }
 
  private:
-  void handleRead();
+  void HandleRead();
 
   EventLoop* loop_;
   Socket acceptSocket_;

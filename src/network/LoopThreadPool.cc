@@ -5,7 +5,7 @@
 #include "network/EventLoop.h"
 #include "network/LoopThread.h"
 
-namespace rnet::Network {
+namespace rnet::network {
 
 // 默认只有main loop
 EventLoopThreadPool::EventLoopThreadPool(EventLoop* baseLoop,
@@ -21,7 +21,7 @@ EventLoopThreadPool::~EventLoopThreadPool() = default;
 
 void EventLoopThreadPool::start(const ThreadInitCallback& cb) {
   assert(!started_);
-  baseLoop_->assertInLoopThread();
+  baseLoop_->AssertInLoopThread();
 
   started_ = true;
 
@@ -40,7 +40,7 @@ void EventLoopThreadPool::start(const ThreadInitCallback& cb) {
 // 如果只有base loop 就返回
 // 如果有工作线程,将从返回工作线程loop
 EventLoop* EventLoopThreadPool::getNextLoop() {
-  baseLoop_->assertInLoopThread();
+  baseLoop_->AssertInLoopThread();
   assert(started_);
   EventLoop* loop = baseLoop_;
 
@@ -56,7 +56,7 @@ EventLoop* EventLoopThreadPool::getNextLoop() {
 }
 
 EventLoop* EventLoopThreadPool::getLoopForHash(size_t hashCode) {
-  baseLoop_->assertInLoopThread();
+  baseLoop_->AssertInLoopThread();
   EventLoop* loop = baseLoop_;
 
   if (!loops_.empty()) {
@@ -66,7 +66,7 @@ EventLoop* EventLoopThreadPool::getLoopForHash(size_t hashCode) {
 }
 
 std::vector<EventLoop*> EventLoopThreadPool::getAllLoops() {
-  baseLoop_->assertInLoopThread();
+  baseLoop_->AssertInLoopThread();
   assert(started_);
   if (loops_.empty()) {
     return std::vector<EventLoop*>(1, baseLoop_);

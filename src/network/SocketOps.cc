@@ -10,33 +10,33 @@
 #include "network/Endian.h"
 
 using namespace rnet;
-using namespace rnet::Network;
+using namespace rnet::network;
 
-const struct sockaddr* Sockets::sockaddr_cast(const struct sockaddr_in6* addr) {
+const struct sockaddr* sockets::SockaddrCast(const struct sockaddr_in6* addr) {
   return static_cast<const struct sockaddr*>(implicit_cast<const void*>(addr));
 }
 
-struct sockaddr* Sockets::sockaddr_cast(struct sockaddr_in6* addr) {
+struct sockaddr* sockets::SockaddrCast(struct sockaddr_in6* addr) {
   return static_cast<struct sockaddr*>(implicit_cast<void*>(addr));
 }
 
-const struct sockaddr* Sockets::sockaddr_cast(const struct sockaddr_in* addr) {
+const struct sockaddr* sockets::SockaddrCast(const struct sockaddr_in* addr) {
   return static_cast<const struct sockaddr*>(implicit_cast<const void*>(addr));
 }
 
-const struct sockaddr_in* Sockets::sockaddr_in_cast(
+const struct sockaddr_in* sockets::SockaddrInCast(
     const struct sockaddr* addr) {
   return static_cast<const struct sockaddr_in*>(
       implicit_cast<const void*>(addr));
 }
 
-const struct sockaddr_in6* Sockets::sockaddr_in6_cast(
+const struct sockaddr_in6* sockets::SockaddrIn6Cast(
     const struct sockaddr* addr) {
   return static_cast<const struct sockaddr_in6*>(
       implicit_cast<const void*>(addr));
 }
 
-int Sockets::createNonblockingOrDie(sa_family_t family) {
+int sockets::CreateNonblockingOrDie(sa_family_t family) {
 #if VALGRIND
   int sockfd = ::socket(family, SOCK_STREAM, IPPROTO_TCP);
   if (sockfd < 0) {
@@ -54,7 +54,7 @@ int Sockets::createNonblockingOrDie(sa_family_t family) {
   return sockfd;
 }
 
-void Sockets::bindOrDie(int sockfd, const struct sockaddr* addr) {
+void sockets::BindOrDie(int sockfd, const struct sockaddr* addr) {
   int ret =
       ::bind(sockfd, addr, static_cast<socklen_t>(sizeof(struct sockaddr_in6)));
   if (ret < 0) {
@@ -62,7 +62,7 @@ void Sockets::bindOrDie(int sockfd, const struct sockaddr* addr) {
   }
 }
 
-void Sockets::listenOrDie(int sockfd) {
+void sockets::ListenOrDie(int sockfd) {
   int ret = ::listen(sockfd, SOMAXCONN);
   if (ret < 0) {
     LOG_SYSFATAL << "sockets::listenOrDie";
@@ -201,7 +201,7 @@ int Sockets::getSocketError(int sockfd) {
 
 struct sockaddr_in6 Sockets::getLocalAddr(int sockfd) {
   struct sockaddr_in6 localaddr;
-  memZero(&localaddr, sizeof localaddr);
+  MemZero(&localaddr, sizeof localaddr);
   auto addrlen = static_cast<socklen_t>(sizeof localaddr);
   if (::getsockname(sockfd, sockaddr_cast(&localaddr), &addrlen) < 0) {
     LOG_SYSERR << "sockets::getLocalAddr";
@@ -211,7 +211,7 @@ struct sockaddr_in6 Sockets::getLocalAddr(int sockfd) {
 
 struct sockaddr_in6 Sockets::getPeerAddr(int sockfd) {
   struct sockaddr_in6 peeraddr;
-  memZero(&peeraddr, sizeof peeraddr);
+  MemZero(&peeraddr, sizeof peeraddr);
   auto addrlen = static_cast<socklen_t>(sizeof peeraddr);
   if (::getpeername(sockfd, sockaddr_cast(&peeraddr), &addrlen) < 0) {
     LOG_SYSERR << "sockets::getPeerAddr";

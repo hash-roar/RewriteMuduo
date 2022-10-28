@@ -4,34 +4,34 @@
 #include "base/Common.h"
 #include "network/Callback.h"
 #include "unix/Time.h"
-namespace rnet::Network {
+namespace rnet::network {
 // using namespace rnet::Unix;  //?
 // using namespace rnet;
-class Timer : rnet::noncopyable {
+class Timer : rnet::Noncopyable {
  public:
-  Timer(TimerCallback cb, Unix::Timestamp when, double interval)
-      : callback_(std::move(cb)),
+  Timer(network::TimerCallback cb, Unix::Timestamp when, double interval)
+      : callback(std::move(cb)),
         expiration_(when),
-        interval_(interval),
-        repeat_(interval > 0.0),
-        sequence_(sNumCreated.fetch_add(1)) {}
+        interval(interval),
+        repeat(interval > 0.0),
+        sequence(sNumCreated.fetch_add(1)) {}
 
-  void run() const { callback_(); }
+  void Run() const { callback(); }
 
-  Unix::Timestamp expiration() const { return expiration_; }
-  bool repeat() const { return repeat_; }
-  int64_t sequence() const { return sequence_; }
+  Unix::Timestamp Expiration() const { return expiration_; }
+  bool Repeat() const { return repeat; }
+  int64_t Sequence() const { return sequence; }
 
-  void restart(rnet::Unix::Timestamp now);
+  void Restart(rnet::Unix::Timestamp now);
 
-  static int64_t numCreated() { return sNumCreated.load(); }
+  static int64_t NumCreated() { return sNumCreated.load(); }
 
  private:
-  const TimerCallback callback_;
+  const network::TimerCallback callback;
   Unix::Timestamp expiration_;
-  const double interval_;
-  const bool repeat_;
-  const int64_t sequence_;
+  const double interval;
+  const bool repeat;
+  const int64_t sequence;
 
   static std::atomic_int64_t sNumCreated;
 };

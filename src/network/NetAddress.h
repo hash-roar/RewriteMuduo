@@ -7,8 +7,8 @@
 
 #include "base/Common.h"
 #include "network/SocketOps.h"
-namespace rnet::Network {
-class InetAddress : public copyable {
+namespace rnet::network {
+class InetAddress : public Copyable {
  public:
   /// Constructs an endpoint with given port number.
   /// Mostly used in TcpServer listening.
@@ -25,30 +25,30 @@ class InetAddress : public copyable {
 
   explicit InetAddress(const struct sockaddr_in6& addr) : addr6_(addr) {}
 
-  sa_family_t family() const { return addr_.sin_family; }
-  std::string toIp() const;
-  std::string toIpPort() const;
-  uint16_t port() const;
+  sa_family_t Family() const { return addr_.sin_family; }
+  std::string ToIp() const;
+  std::string ToIpPort() const;
+  uint16_t Port() const;
 
   // default copy/assignment are Okay
 
-  const struct sockaddr* getSockAddr() const {
-    return Sockets::sockaddr_cast(&addr6_);
+  const struct sockaddr* GetSockAddr() const {
+    return network::sockets::sockaddr_cast(&addr6_);
   }
-  void setSockAddrInet6(const struct sockaddr_in6& addr6) { addr6_ = addr6; }
+  void SetSockAddrInet6(const struct sockaddr_in6& addr6) { addr6_ = addr6; }
 
-  uint32_t ipv4NetEndian() const;
-  uint16_t portNetEndian() const { return addr_.sin_port; }
+  uint32_t Ipv4NetEndian() const;
+  uint16_t PortNetEndian() const { return addr_.sin_port; }
 
   // resolve hostname to IP address, not changing port or sin_family
   // return true on success.
   // thread safe
-  static bool resolve(std::string_view hostname, InetAddress* result);
+  static bool Resolve(std::string_view hostname, InetAddress* result);
   // static std::vector<InetAddress> resolveAll(const char* hostname, uint16_t
   // port = 0);
 
   // set IPv6 ScopeID
-  void setScopeId(uint32_t scope_id);
+  void SetScopeId(uint32_t scope_id);
 
  private:
   union {

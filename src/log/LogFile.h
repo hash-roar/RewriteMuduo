@@ -9,35 +9,34 @@
 #include "file/File.h"
 
 namespace rnet::log {
-class LogFile : noncopyable {
- public:
-  LogFile(const std::string& basename, off_t rollSize, bool threadSafe = true,
-          int flushInterval = 3, int checkEveryN = 1024);
+class LogFile : Noncopyable {
+public:
+  LogFile( const std::string& basename, off_t rollSize, bool threadSafe = true, int flushInterval = 3, int checkEveryN = kbSize );
   ~LogFile();
 
-  void append(const char* logline, int len);
-  void flush();
-  bool rollFile();
+  void Append( const char* logline, int len );
+  void Flush();
+  bool RollFile();
 
- private:
-  void append_unlocked(const char* logline, int len);
+private:
+  void AppendUnlocked( const char* logline, int len );
 
-  static std::string getLogFileName(const std::string& basename, time_t* now);
+  static std::string GetLogFileName( const std::string& basename, time_t* now );
 
-  const std::string basename_;
-  const off_t rollSize_;
-  const int flushInterval_;
-  const int checkEveryN_;
+  const std::string basename;
+  const off_t       rollSize;
+  const int         flushInterval;
+  const int         checkEveryN;
 
   int count_;
 
-  std::optional<std::mutex> mutex_;
-  time_t startOfPeriod_;
-  time_t lastRoll_;
-  time_t lastFlush_;
-  std::unique_ptr<File::AppendFile> file_;
+  std::optional< std::mutex >         mutex_;
+  time_t                              startOfPeriod_;
+  time_t                              lastRoll_;
+  time_t                              lastFlush_;
+  std::unique_ptr< file::AppendFile > file_;
 
-  const static int kRollPerSeconds_ = 60 * 60 * 24;
+  constexpr static int kRollPerSeconds = 60 * 60 * 24;
 };
 
 }  // namespace rnet::log

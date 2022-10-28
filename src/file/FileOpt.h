@@ -2,18 +2,18 @@
 
 #include <cstddef>
 #include <string_view>
-namespace rnet::File {
+namespace rnet::file {
 class FileHelper {
  public:
   FileHelper();
   ~FileHelper();
   enum FsError {
-    NOT_FOUND,
-    PERMISSION,
-    NON_REGULAR_FILE,
-    NONE,
+    notFound,
+    permission,
+    nonRegularFile,
+    none,
   };
-  static size_t fileSize(std::string_view path);
+  static size_t FileSize(std::string_view path);
 
  private:
 };

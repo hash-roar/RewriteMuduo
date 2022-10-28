@@ -1,0 +1,182 @@
+[
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -DCHECK_PTHREAD_RETURN_VALUE -D_FILE_OFFSET_BITS=64 -Wall -Wextra -Werror -Wconversion -Wno-unused-parameter -Wold-style-cast -Woverloaded-virtual -Wpointer-arith -Wshadow -Wwrite-strings -march=native -std=c++17 -Wno-null-dereference -Wno-sign-conversion -Wno-unused-local-typedef -Wthread-safety -g -std=gnu++17 -o CMakeFiles/rmuduotest.dir/main.cc.o -c /home/wind/local/github/RewriteMuodu/main.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/main.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/file/Buffer.cc.o -c /home/wind/local/github/RewriteMuodu/src/file/Buffer.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/file/Buffer.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/file/ConnBuffer.cc.o -c /home/wind/local/github/RewriteMuodu/src/file/ConnBuffer.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/file/ConnBuffer.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/file/File.cc.o -c /home/wind/local/github/RewriteMuodu/src/file/File.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/file/File.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/file/FileOpt.cc.o -c /home/wind/local/github/RewriteMuodu/src/file/FileOpt.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/file/FileOpt.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/unix/Duration.cc.o -c /home/wind/local/github/RewriteMuodu/src/unix/Duration.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/unix/Duration.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/unix/ProcssInfo.cc.o -c /home/wind/local/github/RewriteMuodu/src/unix/ProcssInfo.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/unix/ProcssInfo.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/unix/Thread.cc.o -c /home/wind/local/github/RewriteMuodu/src/unix/Thread.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/unix/Thread.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/unix/Time.cc.o -c /home/wind/local/github/RewriteMuodu/src/unix/Time.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/unix/Time.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/log/AsynLogBackend.cc.o -c /home/wind/local/github/RewriteMuodu/src/log/AsynLogBackend.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/log/AsynLogBackend.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/log/LogFile.cc.o -c /home/wind/local/github/RewriteMuodu/src/log/LogFile.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/log/LogFile.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/log/LogStream.cc.o -c /home/wind/local/github/RewriteMuodu/src/log/LogStream.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/log/LogStream.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/log/Logger.cc.o -c /home/wind/local/github/RewriteMuodu/src/log/Logger.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/log/Logger.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/Acceptor.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/Acceptor.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/Acceptor.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/Channel.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/Channel.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/Channel.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/Connector.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/Connector.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/Connector.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/Epoll.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/Epoll.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/Epoll.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/EventLoop.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/EventLoop.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/EventLoop.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/LoopThread.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/LoopThread.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/LoopThread.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/LoopThreadPool.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/LoopThreadPool.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/LoopThreadPool.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/NetAddress.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/NetAddress.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/NetAddress.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/Socket.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/Socket.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/Socket.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/SocketOps.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/SocketOps.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/SocketOps.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/TcpConnection.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/TcpConnection.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/TcpConnection.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/TcpServer.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/TcpServer.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/TcpServer.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/Timer.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/Timer.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/Timer.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/rnet.dir/network/TimerQueue.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/TimerQueue.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/TimerQueue.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src/file",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/file_test.dir/test/file_test.cc.o -c /home/wind/local/github/RewriteMuodu/src/file/test/file_test.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/file/test/file_test.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src/network",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/test_server.dir/test/test_server.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/test/test_server.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/test/test_server.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src/network",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/test_full_server.dir/test/test_full_server.cc.o -c /home/wind/local/github/RewriteMuodu/src/network/test/test_full_server.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/network/test/test_full_server.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/src/unix",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/test_duration.dir/test/test_duration.cc.o -c /home/wind/local/github/RewriteMuodu/src/unix/test/test_duration.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/src/unix/test/test_duration.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/test",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/file_basic_test.dir/file/file_basic_test.cc.o -c /home/wind/local/github/RewriteMuodu/test/file/file_basic_test.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/test/file/file_basic_test.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/test",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/asylogging_test.dir/log/asylogging_test.cc.o -c /home/wind/local/github/RewriteMuodu/test/log/asylogging_test.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/test/log/asylogging_test.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/test",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/log_test.dir/log/log_test.cc.o -c /home/wind/local/github/RewriteMuodu/test/log/log_test.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/test/log/log_test.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/test",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/thread_test.dir/unix/thread_test.cc.o -c /home/wind/local/github/RewriteMuodu/test/unix/thread_test.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/test/unix/thread_test.cc"
+},
+{
+  "directory": "/home/wind/local/github/RewriteMuodu/build/test",
+  "command": "/home/linuxbrew/.linuxbrew/bin/clang++  -I/home/wind/local/github/RewriteMuodu/src -g -std=gnu++17 -o CMakeFiles/time_test.dir/unix/time_test.cc.o -c /home/wind/local/github/RewriteMuodu/test/unix/time_test.cc",
+  "file": "/home/wind/local/github/RewriteMuodu/test/unix/time_test.cc"
+}
+]

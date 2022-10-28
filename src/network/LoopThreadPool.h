@@ -5,11 +5,11 @@
 #include <vector>
 
 #include "base/Common.h"
-namespace rnet::Network {
+namespace rnet::network {
 class EventLoop;
 class EventLoopThread;
 
-class EventLoopThreadPool : noncopyable {
+class EventLoopThreadPool : Noncopyable {
  public:
   //事件回调,注册到loop thread中
   using ThreadInitCallback = std::function<void(EventLoop*)>;
@@ -17,21 +17,21 @@ class EventLoopThreadPool : noncopyable {
   EventLoopThreadPool(EventLoop* baseLoop, const std::string& nameArg);
   ~EventLoopThreadPool();
   // 设置io线程数量,默认为0 即io都在主线程做
-  void setThreadNum(int numThreads) { numThreads_ = numThreads; }
-  void start(const ThreadInitCallback& cb = ThreadInitCallback());
+  void SetThreadNum(int numThreads) { numThreads_ = numThreads; }
+  void Start(const ThreadInitCallback& cb = ThreadInitCallback());
 
   // 暴露给tcp server用于分发tcp connection任务,
   // 在start调用后才能调用,否则断言失败程序崩溃
-  EventLoop* getNextLoop();
+  EventLoop* GetNextLoop();
 
   // 简单对hash code 取余选取loop
-  EventLoop* getLoopForHash(size_t hashCode);
+  EventLoop* GetLoopForHash(size_t hashCode);
 
-  std::vector<EventLoop*> getAllLoops();
+  std::vector<EventLoop*> GetAllLoops();
 
-  bool started() const { return started_; }
+  bool Started() const { return started_; }
 
-  const std::string& name() const { return name_; }
+  const std::string& Name() const { return name_; }
 
  private:
   EventLoop* baseLoop_;

@@ -5,10 +5,10 @@
 #include "file/ConnBuffer.h"
 #include "unix/Time.h"
 
-namespace rnet::File {
+namespace rnet::file {
 class Buffer;
 }  // namespace rnet::File
-namespace rnet::Network {
+namespace rnet::network {
 
 class TcpConnection;
 
@@ -22,13 +22,13 @@ using HighWaterMarkCallback =
 
 // the data has been read to (buf, len)
 using MessageCallback = std::function<void(
-    const TcpConnectionPtr &, File::Buffer *, rnet::Unix::Timestamp)>;
+    const TcpConnectionPtr &, file::Buffer *, rnet::Unix::Timestamp)>;
 
 using MessageCallback = std::function<void(const TcpConnectionPtr &,
-                                           File::Buffer *, Unix::Timestamp)>;
+                                           file::Buffer *, Unix::Timestamp)>;
 
-void defaultConnectionCallback(const TcpConnectionPtr &conn);
-void defaultMessageCallback(const TcpConnectionPtr &conn, File::Buffer *buffer,
+void DefaultConnectionCallback(const TcpConnectionPtr &conn);
+void DefaultMessageCallback(const TcpConnectionPtr &conn, file::Buffer *buffer,
                             Unix::Timestamp receiveTime);
 
 }  // namespace rnet::Network

@@ -4,42 +4,42 @@
 
 #include "base/Common.h"
 #include "network/NetAddress.h"
-namespace rnet::Network {
+namespace rnet::network {
 class Channel;
 class EventLoop;
 
-class Connector : noncopyable, public std::enable_shared_from_this<Connector> {
+class Connector : Noncopyable, public std::enable_shared_from_this<Connector> {
  public:
   using NewConnectionCallback = std::function<void(int)>;
 
   Connector(EventLoop* loop, const InetAddress& serverAddr);
   ~Connector();
 
-  void setNewConnectionCallback(const NewConnectionCallback& cb) {
+  void SetNewConnectionCallback(const NewConnectionCallback& cb) {
     newConnectionCallback_ = cb;
   }
 
-  void start();    // can be called in any thread
-  void restart();  // must be called in loop thread
-  void stop();     // can be called in any thread
+  void Start();    // can be called in any thread
+  void Restart();  // must be called in loop thread
+  void Stop();     // can be called in any thread
 
-  const InetAddress& serverAddress() const { return serverAddr_; }
+  const InetAddress& ServerAddress() const { return serverAddr_; }
 
  private:
   enum States { kDisconnected, kConnecting, kConnected };
   static const int kMaxRetryDelayMs = 30 * 1000;
   static const int kInitRetryDelayMs = 500;
 
-  void setState(States s) { state_ = s; }
-  void startInLoop();
-  void stopInLoop();
-  void connect();
-  void connecting(int sockfd);
-  void handleWrite();
-  void handleError();
-  void retry(int sockfd);
-  int removeAndResetChannel();
-  void resetChannel();
+  void SetState(States s) { state_ = s; }
+  void StartInLoop();
+  void StopInLoop();
+  void Connect();
+  void Connecting(int sockfd);
+  void HandleWrite();
+  void HandleError();
+  void Retry(int sockfd);
+  int RemoveAndResetChannel();
+  void ResetChannel();
 
   EventLoop* loop_;
   InetAddress serverAddr_;

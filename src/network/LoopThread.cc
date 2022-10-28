@@ -4,7 +4,7 @@
 #include <mutex>
 
 #include "network/EventLoop.h"
-namespace rnet::Network {
+namespace rnet::network {
 // 二段式构造,初始化时io loop还没有生成,需要手动start
 EventLoopThread::EventLoopThread(const ThreadInitCallback& cb,
                                  const std::string& name)
@@ -25,12 +25,12 @@ EventLoopThread::~EventLoopThread() {
     // now. but when EventLoopThread destructs, usually programming is exiting
     // anyway.
     loop_->quit();
-    thread_.join();
+    thread_.Join();
   }
 }
 EventLoop* EventLoopThread::startLoop() {
-  assert(!thread_.started());
-  thread_.start();
+  assert(!thread_.Started());
+  thread_.Start();
 
   // 这里可以用倒计时
   // 用条件变量是等待线程启动并完成loop的初始化,否则loop可能返回nullptr

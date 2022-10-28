@@ -2,14 +2,14 @@
 
 #include <atomic>
 
-namespace rnet::Network {
+namespace rnet::network {
 std::atomic_int64_t Timer::sNumCreated{0};
 
-void Timer::restart(Unix::Timestamp now) {
-  if (repeat_) {
-    expiration_ = Unix::addTime(now, interval_);
+void Timer::Restart(Unix::Timestamp now) {
+  if (repeat) {
+    expiration_ = Unix::AddTime(now, interval);
   } else {
-    expiration_ = Unix::Timestamp::invalid();
+    expiration_ = Unix::Timestamp::Invalid();
   }
 }
 }  // namespace rnet::Network

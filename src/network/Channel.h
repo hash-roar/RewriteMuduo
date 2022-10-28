@@ -3,7 +3,7 @@
 
 #include "base/Common.h"
 #include "unix/Time.h"
-namespace rnet::Network {
+namespace rnet::network {
 
 class EventLoop;
 
@@ -12,7 +12,7 @@ class EventLoop;
 // epoll 将对应事件添加到activeChannels集合中.然后event
 // loop负责调用每个channel的handleEvent函数 在这个函数中,tcp
 // connection注册的回调被调用,从而用户注册的回调也被调用
-class Channel : noncopyable {
+class Channel : Noncopyable {
  public:
   using EventCallback = std::function<void()>;
   using ReadEventCallback = std::function<void(Unix::Timestamp)>;
@@ -20,70 +20,70 @@ class Channel : noncopyable {
   Channel(EventLoop* loop, int fd);
   ~Channel();
 
-  void handleEvent(Unix::Timestamp receiveTime);
-  void setReadCallback(ReadEventCallback cb) { readCallback_ = std::move(cb); }
-  void setWriteCallback(EventCallback cb) { writeCallback_ = std::move(cb); }
-  void setCloseCallback(EventCallback cb) { closeCallback_ = std::move(cb); }
-  void setErrorCallback(EventCallback cb) { errorCallback_ = std::move(cb); }
+  void HandleEvent(Unix::Timestamp receiveTime);
+  void SetReadCallback(ReadEventCallback cb) { readCallback_ = std::move(cb); }
+  void SetWriteCallback(EventCallback cb) { writeCallback_ = std::move(cb); }
+  void SetCloseCallback(EventCallback cb) { closeCallback_ = std::move(cb); }
+  void SetErrorCallback(EventCallback cb) { errorCallback_ = std::move(cb); }
 
   /// Tie this channel to the owner object managed by shared_ptr,
   /// prevent the owner object being destroyed in handleEvent.
-  void tie(const std::shared_ptr<void>&);
+  void Tie(const std::shared_ptr<void>&);
 
-  int fd() const { return fd_; }
-  int events() const { return events_; }
-  void set_revents(int revt) { revents_ = revt; }  // used by pollers
-  // int revents() const { return revents_; }
-  bool isNoneEvent() const { return events_ == kNoneEvent; }
+  int Fd() const { return fd; }
+  int Events() const { return events_; }
+  void SetRevents(int revt) { revents_ = revt; }  // used by pollers
+  // int rEvents() const { return revents_; }
+  bool IsNoneEvent() const { return events_ == kNoneEvent; }
 
-  void enableReading() {
+  void EnableReading() {
     events_ |= kReadEvent;
-    update();
+    Update();
   }
-  void disableReading() {
+  void DisableReading() {
     events_ &= ~kReadEvent;
-    update();
+    Update();
   }
-  void enableWriting() {
+  void EnableWriting() {
     events_ |= kWriteEvent;
-    update();
+    Update();
   }
-  void disableWriting() {
+  void DisableWriting() {
     events_ &= ~kWriteEvent;
-    update();
+    Update();
   }
-  void disableAll() {
+  void DisableAll() {
     events_ = kNoneEvent;
-    update();
+    Update();
   }
-  bool isWriting() const { return events_ & kWriteEvent; }
-  bool isReading() const { return events_ & kReadEvent; }
+  bool IsWriting() const { return events_ & kWriteEvent; }
+  bool IsReading() const { return events_ & kReadEvent; }
 
   // for Poller
-  int index() { return index_; }
-  void set_index(int idx) { index_ = idx; }
+  int Index() { return index_; }
+  void SetIndex(int idx) { index_ = idx; }
 
   // for debug
-  std::string reventsToString() const;
-  std::string eventsToString() const;
+  std::string ReventsToString() const;
+  std::string EventsToString() const;
 
-  void doNotLogHup() { logHup_ = false; }
+  void DoNotLogHup() { logHup_ = false; }
 
-  EventLoop* ownerLoop() { return loop_; }
-  void remove();
+  EventLoop* OwnerLoop() { return loop_; }
+  void Remove();
 
  private:
-  static std::string eventsToString(int fd, int ev);
+  static std::string EventsToString(int fd, int ev);
 
-  void update();
-  void handleEventWithGuard(Unix::Timestamp receiveTime);
+  void Update();
+  void HandleEventWithGuard(Unix::Timestamp receiveTime);
 
   static const int kNoneEvent;
   static const int kReadEvent;
   static const int kWriteEvent;
 
   EventLoop* loop_;
-  const int fd_;
+  const int fd;
   int events_{0};
   int revents_{0};  // it's the received event types of epoll or poll
   int index_{-1};   // used by Poller.

@@ -5,14 +5,10 @@
 
 #include "file/File.h"
 
-using namespace rnet::File;
+namespace rnet::file {
 
-namespace rnet::File {
-
-
-template <int SIZE>
-const char* SizedBuffer<SIZE>::debugString() {
-  *cur_ = '\0';
-  return data_;
+template < int SIZE > const char* SizedBuffer< SIZE >::DebugString() {
+    *cur_ = '\0';
+    return data_;
 }
-}  // namespace rnet::File
+}  // namespace rnet::file

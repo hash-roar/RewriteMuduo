@@ -9,49 +9,52 @@
 
 namespace rnet {
 
-using SysTimep_t = std::chrono::time_point<std::chrono::system_clock>;
-using SteadyTimep_t = std::chrono::time_point<std::chrono::steady_clock>;
-// 直接继承此类导致子类不可被复制
-class noncopyable {
- public:
-  noncopyable(const noncopyable &) = delete;
-  void operator=(const noncopyable &) = delete;
+constexpr size_t kbSize = 1024;
 
- protected:
-  noncopyable() = default;
-  ~noncopyable() = default;
+using SysTimep_t    = std::chrono::time_point< std::chrono::system_clock >;
+using SteadyTimep_t = std::chrono::time_point< std::chrono::steady_clock >;
+// 直接继承此类导致子类不可被复制
+class Noncopyable {
+public:
+  Noncopyable( const Noncopyable& )    = delete;
+  void operator=( const Noncopyable& ) = delete;
+
+protected:
+  Noncopyable()  = default;
+  ~Noncopyable() = default;
 };
-class copyable {
- protected:
-  copyable() = default;
-  ~copyable() = default;
+class Copyable {
+protected:
+  Copyable()  = default;
+  ~Copyable() = default;
 };
 
 // 显式表明隐式转换
-template <typename To, typename From>
-inline To implicit_cast(From const &f) {
+template < typename To, typename From >
+inline To implicit_cast( From const& f )  // NOLINT: same style with static_cast
+{
   return f;
 }
 // 将缓冲区置零
-inline void memZero(void *p, size_t n) { memset(p, 0, n); }
+inline void MemZero( void* p, size_t n ) {
+  memset( p, 0, n );
+}
 
-#pragma once
+#define RNET_ASSERT( expr, message ) assert( ( expr ) && ( message ) )
 
-#define RNET_ASSERT(expr, message) assert((expr) && (message))
-
-#define UNREACHABLE(message) throw std::logic_error(message)
+#define UNREACHABLE( message ) throw std::logic_error( message )
 
 // Macros to disable copying and moving
-#define DISALLOW_COPY(cname)                             \
-  cname(const cname &) = delete;            /* NOLINT */ \
-  cname &operator=(const cname &) = delete; /* NOLINT */
+#define DISALLOW_COPY( cname )                            \
+  cname( const cname& )            = delete; /* NOLINT */ \
+  cname& operator=( const cname& ) = delete; /* NOLINT */
 
-#define DISALLOW_MOVE(cname)                        \
-  cname(cname &&) = delete;            /* NOLINT */ \
-  cname &operator=(cname &&) = delete; /* NOLINT */
+#define DISALLOW_MOVE( cname )                       \
+  cname( cname&& )            = delete; /* NOLINT */ \
+  cname& operator=( cname&& ) = delete; /* NOLINT */
 
-#define DISALLOW_COPY_AND_MOVE(cname) \
-  DISALLOW_COPY(cname);               \
-  DISALLOW_MOVE(cname);
+#define DISALLOW_COPY_AND_MOVE( cname ) \
+  DISALLOW_COPY( cname );               \
+  DISALLOW_MOVE( cname );
 
 }  // namespace rnet

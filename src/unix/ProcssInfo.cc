@@ -15,7 +15,7 @@
 
 namespace rnet::Unix {
 thread_local int tNumOpenedFiles = 0;
-int fdDirFilter(const struct dirent* d) {
+int FdDirFilter(const struct dirent* d) {
   if (::isdigit(d->d_name[0])) {
     ++tNumOpenedFiles;
   }
@@ -23,60 +23,60 @@ int fdDirFilter(const struct dirent* d) {
 }
 
 thread_local std::vector<pid_t>* tPids = nullptr;
-int taskDirFilter(const struct dirent* d) {
+int TaskDirFilter(const struct dirent* d) {
   if (::isdigit(d->d_name[0])) {
     tPids->push_back(atoi(d->d_name));
   }
   return 0;
 }
 
-int scanDir(const char* dirpath, int (*filter)(const struct dirent*)) {
+int ScanDir(const char* dirpath, int (*filter)(const struct dirent*)) {
   struct dirent** namelist = nullptr;
   int result = ::scandir(dirpath, &namelist, filter, alphasort);
   assert(namelist == nullptr);
   return result;
 }
 
-Timestamp GlobalStartTime = Timestamp::now();
+Timestamp globalStartTime = Timestamp::Now();
 // assume those won't change during the life time of a process.
-int GlobalClockTicks = static_cast<int>(::sysconf(_SC_CLK_TCK));
-int GlobalPageSize = static_cast<int>(::sysconf(_SC_PAGE_SIZE));
+int globalClockTicks = static_cast<int>(::sysconf(_SC_CLK_TCK));
+int globalPageSize = static_cast<int>(::sysconf(_SC_PAGE_SIZE));
 }  // namespace rnet::Unix
 
 using namespace rnet;
 
-pid_t Unix::pid() { return ::getpid(); }
+pid_t Unix::Pid() { return ::getpid(); }
 
-std::string Unix::pidString() {
+std::string Unix::PidString() {
   char buf[32];
-  snprintf(buf, sizeof buf, "%d", pid());
+  snprintf(buf, sizeof buf, "%d", Pid());
   return buf;
 }
 
-uid_t Unix::uid() { return ::getuid(); }
+uid_t Unix::Uid() { return ::getuid(); }
 
-std::string Unix::username() {
+std::string Unix::Username() {
   struct passwd pwd;
   struct passwd* result = nullptr;
   char buf[8192];
   const char* name = "unknownUser";
 
-  getpwuid_r(uid(), &pwd, buf, sizeof buf, &result);
+  getpwuid_r(Uid(), &pwd, buf, sizeof buf, &result);
   if (result) {
     name = pwd.pw_name;
   }
   return name;
 }
 
-uid_t Unix::euid() { return ::geteuid(); }
+uid_t Unix::Euid() { return ::geteuid(); }
 
-Unix::Timestamp Unix::startTime() { return GlobalStartTime; }
+Unix::Timestamp Unix::StartTime() { return globalStartTime; }
 
-int Unix::clockTicksPerSecond() { return GlobalClockTicks; }
+int Unix::ClockTicksPerSecond() { return globalClockTicks; }
 
-int Unix::pageSize() { return GlobalPageSize; }
+int Unix::PageSize() { return globalPageSize; }
 
-bool Unix::isDebugBuild() {
+bool Unix::IsDebugBuild() {
 #ifdef NDEBUG
   return false;
 #else
@@ -84,7 +84,7 @@ bool Unix::isDebugBuild() {
 #endif
 }
 
-std::string Unix::hostname() {
+std::string Unix::Hostname() {
   // HOST_NAME_MAX 64
   // _POSIX_HOST_NAME_MAX 255
   char buf[256];
@@ -96,9 +96,9 @@ std::string Unix::hostname() {
   }
 }
 
-std::string Unix::procname() { return std::string{procname(procStat())}; }
+std::string Unix::Procname() { return std::string{Procname(ProcStat())}; }
 
-std::string_view Unix::procname(const std::string& stat) {
+std::string_view Unix::Procname(const std::string& stat) {
   std::string_view name{};
   size_t lp = stat.find('(');
   size_t rp = stat.rfind(')');
@@ -109,27 +109,27 @@ std::string_view Unix::procname(const std::string& stat) {
   return name;
 }
 
-std::string Unix::procStatus() {
+std::string Unix::ProcStatus() {
   std::string result;
-  File::readFile("/proc/self/status", 65536, &result);
+  file::ReadFile("/proc/self/status", 65536, &result);
   return result;
 }
 
-std::string Unix::procStat() {
+std::string Unix::ProcStat() {
   std::string result;
-  File::readFile("/proc/self/stat", 65536, &result);
+  file::ReadFile("/proc/self/stat", 65536, &result);
   return result;
 }
 
-std::string Unix::threadStat() {
+std::string Unix::ThreadStat() {
   char buf[64];
-  snprintf(buf, sizeof buf, "/proc/self/task/%d/stat", Thread::tid());
+  snprintf(buf, sizeof buf, "/proc/self/task/%d/stat", thread::Tid());
   std::string result;
-  File::readFile(buf, 65536, &result);
+  file::ReadFile(buf, 65536, &result);
   return result;
 }
 
-std::string Unix::exePath() {
+std::string Unix::ExePath() {
   std::string result;
   char buf[1024];
   ssize_t n = ::readlink("/proc/self/exe", buf, sizeof buf);
@@ -139,16 +139,16 @@ std::string Unix::exePath() {
   return result;
 }
 
-int Unix::openedFiles() {
+int Unix::OpenedFiles() {
   tNumOpenedFiles = 0;
-  scanDir("/proc/self/fd", fdDirFilter);
+  ScanDir("/proc/self/fd", FdDirFilter);
   return tNumOpenedFiles;
 }
 
-int Unix::maxOpenFiles() {
+int Unix::MaxOpenFiles() {
   struct rlimit rl;
   if (::getrlimit(RLIMIT_NOFILE, &rl)) {
-    return openedFiles();
+    return OpenedFiles();
   } else {
     return static_cast<int>(rl.rlim_cur);
   }
@@ -165,9 +165,9 @@ int Unix::maxOpenFiles() {
 //   return t;
 // }
 
-int Unix::numThreads() {
+int Unix::NumThreads() {
   int result = 0;
-  std::string status = procStatus();
+  std::string status = ProcStatus();
   size_t pos = status.find("Threads:");
   if (pos != std::string::npos) {
     result = ::atoi(status.c_str() + pos + 8);
@@ -175,10 +175,10 @@ int Unix::numThreads() {
   return result;
 }
 
-std::vector<pid_t> Unix::threads() {
+std::vector<pid_t> Unix::Threads() {
   std::vector<pid_t> result;
   tPids = &result;
-  scanDir("/proc/self/task", taskDirFilter);
+  ScanDir("/proc/self/task", TaskDirFilter);
   tPids = nullptr;
   std::sort(result.begin(), result.end());
   return result;

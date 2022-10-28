@@ -49,16 +49,16 @@ TcpConnection::TcpConnection(EventLoop* loop, const std::string& nameArg,
 
 TcpConnection::~TcpConnection() {
   LOG_DEBUG << "TcpConnection::dtor[" << name_ << "] at " << this
-            << " fd=" << channel_->fd() << " state=" << stateToString();
+            << " fd=" << channel_->Fd() << " state=" << stateToString();
   assert(state_ == kDisconnected);
   // 确保connection是经过connectionDestroyed函数关闭的,否则会存在错误的智能指针
 }
 
-bool TcpConnection::getTcpInfo(struct tcp_info* tcpi) const {
+bool TcpConnection::GetTcpInfo(struct tcp_info* tcpi) const {
   return socket_->getTcpInfo(tcpi);
 }
 
-std::string TcpConnection::getTcpInfoString() const {
+std::string TcpConnection::GetTcpInfoString() const {
   char buf[1024];
   buf[0] = '\0';
   socket_->getTcpInfoString(buf, sizeof buf);
@@ -67,18 +67,18 @@ std::string TcpConnection::getTcpInfoString() const {
 
 //发送数据,数据的生存周期由自己保证.
 //一般是栈数据,但是send时会将数据拷贝到io loop
-void TcpConnection::send(const void* data, int len) {
+void TcpConnection::Send(const void* data, int len) {
   send(std::string_view(static_cast<const char*>(data), len));
 }
 
-void TcpConnection::send(std::string_view message) {
+void TcpConnection::Send(std::string_view message) {
   if (state_ == kConnected) {
     if (loop_->isInLoopThread()) {
       sendInLoop(message);
     } else {
-      auto function_pointer = &TcpConnection::sendInLoop;
+      auto functionPointer = &TcpConnection::sendInLoop;
       //产生复制
-      loop_->runInLoop(std::bind(function_pointer,
+      loop_->runInLoop(std::bind(functionPointer,
                                  this,  // FIXME
                                  std::string{message}));
       // 这里发生了数据复制
@@ -87,14 +87,14 @@ void TcpConnection::send(std::string_view message) {
   }
 }
 
-void TcpConnection::send(Buffer* buf) {
+void TcpConnection::Send(Buffer* buf) {
   if (state_ == kConnected) {
     if (loop_->isInLoopThread()) {
       doSendInLoop(buf->peek(), buf->readableBytes());
       buf->retrieveAll();
     } else {
-      auto function_pointer = &TcpConnection::sendInLoop;
-      loop_->runInLoop(std::bind(function_pointer,
+      auto functionPointer = &TcpConnection::sendInLoop;
+      loop_->runInLoop(std::bind(functionPointer,
                                  this,  // FIXME
                                  buf->retrieveAllAsString()));
       // 生成的临时变量经过移动构造成为生成的仿函数的成员变量
@@ -104,14 +104,14 @@ void TcpConnection::send(Buffer* buf) {
   }
 }
 
-void TcpConnection::sendInLoop(std::string_view message) {
+void TcpConnection::SendInLoop(std::string_view message) {
   doSendInLoop(message.data(), message.size());
 }
 
 // 发送数据的核心逻辑
-void TcpConnection::doSendInLoop(const void* data, size_t len) {
-  loop_->assertInLoopThread();
-  ssize_t write_bytes = 0;
+void TcpConnection::DoSendInLoop(const void* data, size_t len) {
+  loop_->AssertInLoopThread();
+  ssize_t writeBytes = 0;
   size_t remaining = len;
   bool faultError = false;
   // 在已经调用了handleClose 或者connectionDestroy
@@ -127,9 +127,9 @@ void TcpConnection::doSendInLoop(const void* data, size_t len) {
   // 上次已经超量发送:
   // 上次超量发送,此时直接跳过直接发送将数据存到发送缓冲区,否则数据可能会乱序
   if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0) {
-    write_bytes = Sockets::write(channel_->fd(), data, len);
-    if (write_bytes >= 0) {
-      remaining = len - write_bytes;
+    writeBytes = Sockets::write(channel_->Fd(), data, len);
+    if (writeBytes >= 0) {
+      remaining = len - writeBytes;
       //如果发送完了
       if (remaining == 0 && writeCompleteCallback_) {
         loop_->queueInLoop(
@@ -137,7 +137,7 @@ void TcpConnection::doSendInLoop(const void* data, size_t len) {
       }
     } else  // write_bytes < 0
     {
-      write_bytes = 0;
+      writeBytes = 0;
 
       // 非阻塞套接字写满了返回EWOULDBLOCK,此情况忽略,其余情况为需要log的错误
       if (errno != EWOULDBLOCK) {
@@ -173,7 +173,7 @@ void TcpConnection::doSendInLoop(const void* data, size_t len) {
 }
 
 //关闭写端,此时状态为kDisconnecting
-void TcpConnection::shutdown() {
+void TcpConnection::Shutdown() {
   // FIXME: use compare and swap
   if (state_ == kConnected) {
     setState(kDisconnecting);
@@ -182,15 +182,15 @@ void TcpConnection::shutdown() {
   }
 }
 
-void TcpConnection::shutdownInLoop() {
-  loop_->assertInLoopThread();
+void TcpConnection::ShutdownInLoop() {
+  loop_->AssertInLoopThread();
   if (!channel_->isWriting()) {
     // we are not writing
     socket_->shutdownWrite();
   }
 }
 
-void TcpConnection::forceClose() {
+void TcpConnection::ForceClose() {
   // FIXME: use compare and swap
   if (state_ == kConnected || state_ == kDisconnecting) {
     setState(kDisconnecting);
@@ -199,8 +199,8 @@ void TcpConnection::forceClose() {
   }
 }
 
-void TcpConnection::forceCloseInLoop() {
-  loop_->assertInLoopThread();
+void TcpConnection::ForceCloseInLoop() {
+  loop_->AssertInLoopThread();
   if (state_ == kConnected || state_ == kDisconnecting) {
     // as if we received 0 byte in handleRead();
     handleClose();
@@ -219,7 +219,7 @@ void TcpConnection::forceCloseInLoop() {
 //   }
 // }
 
-const char* TcpConnection::stateToString() const {
+const char* TcpConnection::StateToString() const {
   switch (state_) {
     case kDisconnected:
       return "kDisconnected";
@@ -235,27 +235,27 @@ const char* TcpConnection::stateToString() const {
 }
 
 // 关闭tcp delay算法,指将几个小包合成一个大包发送.但是会增加延迟
-void TcpConnection::setTcpNoDelay(bool on) { socket_->setTcpNoDelay(on); }
+void TcpConnection::SetTcpNoDelay(bool on) { socket_->setTcpNoDelay(on); }
 
 //关注read事件,下一次轮询即可读到数据
-void TcpConnection::startRead() {
+void TcpConnection::StartRead() {
   loop_->runInLoop(std::bind(&TcpConnection::startReadInLoop, this));
 }
 
-void TcpConnection::startReadInLoop() {
-  loop_->assertInLoopThread();
+void TcpConnection::StartReadInLoop() {
+  loop_->AssertInLoopThread();
   if (!reading_ || !channel_->isReading()) {
     channel_->enableReading();
     reading_ = true;
   }
 }
 
-void TcpConnection::stopRead() {
+void TcpConnection::StopRead() {
   loop_->runInLoop(std::bind(&TcpConnection::stopReadInLoop, this));
 }
 
-void TcpConnection::stopReadInLoop() {
-  loop_->assertInLoopThread();
+void TcpConnection::StopReadInLoop() {
+  loop_->AssertInLoopThread();
   if (reading_ || channel_->isReading()) {
     channel_->disableReading();
     reading_ = false;
@@ -263,8 +263,8 @@ void TcpConnection::stopReadInLoop() {
 }
 
 // 在连接建立的回调中调用,绑定智能指针用于保活,更新状态机状态
-void TcpConnection::connectEstablished() {
-  loop_->assertInLoopThread();
+void TcpConnection::ConnectEstablished() {
+  loop_->AssertInLoopThread();
   assert(state_ == kConnecting);
   setState(kConnected);
   channel_->tie(shared_from_this());
@@ -275,8 +275,8 @@ void TcpConnection::connectEstablished() {
 
 //连接关闭的最后一步,此时只有最后一个智能指针隐式绑定在函数对象内,
 //本函数执行完堆内存析构,套接字关闭,文件描述符释放
-void TcpConnection::connectDestroyed() {
-  loop_->assertInLoopThread();
+void TcpConnection::ConnectDestroyed() {
+  loop_->AssertInLoopThread();
   if (state_ == kConnected) {
     setState(kDisconnected);
     //告诉内核不再关注此描述符事件
@@ -289,11 +289,11 @@ void TcpConnection::connectDestroyed() {
   channel_->remove();
 }
 
-void TcpConnection::handleRead(Timestamp receiveTime) {
-  loop_->assertInLoopThread();
+void TcpConnection::HandleRead(Timestamp receiveTime) {
+  loop_->AssertInLoopThread();
   int savedErrno = 0;
   // 读数据会尽量读取数据,最多可读到65536+buffer.size()长度数据
-  ssize_t n = inputBuffer_.readFd(channel_->fd(), &savedErrno);
+  ssize_t n = inputBuffer_.readFd(channel_->Fd(), &savedErrno);
   if (n > 0) {
     messageCallback_(shared_from_this(), &inputBuffer_, receiveTime);
     // 当对方请求关闭连接时,epoll返回epollin | EPOLLRDHUP
@@ -307,10 +307,10 @@ void TcpConnection::handleRead(Timestamp receiveTime) {
   }
 }
 
-void TcpConnection::handleWrite() {
-  loop_->assertInLoopThread();
+void TcpConnection::HandleWrite() {
+  loop_->AssertInLoopThread();
   if (channel_->isWriting()) {
-    ssize_t n = Sockets::write(channel_->fd(), outputBuffer_.peek(),
+    ssize_t n = Sockets::write(channel_->Fd(), outputBuffer_.peek(),
                                outputBuffer_.readableBytes());
     if (n > 0) {
       outputBuffer_.retrieve(n);
@@ -336,14 +336,14 @@ void TcpConnection::handleWrite() {
       // }
     }
   } else {
-    LOG_TRACE << "Connection fd = " << channel_->fd()
+    LOG_TRACE << "Connection fd = " << channel_->Fd()
               << " is down, no more writing";
   }
 }
 
-void TcpConnection::handleClose() {
-  loop_->assertInLoopThread();
-  LOG_TRACE << "fd = " << channel_->fd() << " state = " << stateToString();
+void TcpConnection::HandleClose() {
+  loop_->AssertInLoopThread();
+  LOG_TRACE << "fd = " << channel_->Fd() << " state = " << stateToString();
   assert(state_ == kConnected || state_ == kDisconnecting);
   // we don't close fd, leave it to dtor, so we can find leaks easily.
   setState(kDisconnected);
@@ -356,8 +356,8 @@ void TcpConnection::handleClose() {
   closeCallback_(guardThis);
 }
 
-void TcpConnection::handleError() {
-  int err = Sockets::getSocketError(channel_->fd());
+void TcpConnection::HandleError() {
+  int err = Sockets::getSocketError(channel_->Fd());
   LOG_ERROR << "TcpConnection::handleError [" << name_
             << "] - SO_ERROR = " << err << " " << Thread::getErrnoMessage(err);
 }
@@ -366,15 +366,15 @@ void TcpConnection::handleError() {
 
 using namespace rnet::Network;
 
-void rnet::Network::defaultConnectionCallback(const TcpConnectionPtr& conn) {
-  LOG_TRACE << conn->localAddress().toIpPort() << " -> "
-            << conn->peerAddress().toIpPort() << " is "
+void rnet::Network::DefaultConnectionCallback(const TcpConnectionPtr& conn) {
+  LOG_TRACE << conn->localAddress().ToIpPort() << " -> "
+            << conn->peerAddress().ToIpPort() << " is "
             << (conn->connected() ? "UP" : "DOWN");
   // do not call conn->forceClose(), because some users want to register message
   // callback only.
 }
 
-void rnet::Network::defaultMessageCallback(const TcpConnectionPtr&,
+void rnet::Network::DefaultMessageCallback(const TcpConnectionPtr&,
                                            File::Buffer* buf, Unix::Timestamp) {
   buf->retrieveAll();
 }

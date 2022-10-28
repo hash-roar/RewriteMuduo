@@ -7,33 +7,33 @@
 #include "base/Common.h"
 #include "network/EventLoop.h"
 #include "unix/Time.h"
-namespace rnet::Network {
+namespace rnet::network {
 class Channel;
 
-class Epoll : noncopyable {
+class Epoll : Noncopyable {
   using ChannelList = std::vector<Channel*>;
 
  public:
   Epoll(EventLoop* loop);
   ~Epoll();
 
-  Unix::Timestamp poll(int timeoutMs, ChannelList* activeChannels);
-  void updateChannel(Channel* channel);
-  void removeChannel(Channel* channel);
-  bool hasChannel(Channel* channel) const;
-  static Epoll newPoller(EventLoop* loop);
+  Unix::Timestamp Poll(int timeoutMs, ChannelList* activeChannels);
+  void UpdateChannel(Channel* channel);
+  void RemoveChannel(Channel* channel);
+  bool HasChannel(Channel* channel) const;
+  static Epoll NewPoller(EventLoop* loop);
 
-  void assertInLoopThread() const { ownerLoop_->assertInLoopThread(); }
+  void AssertInLoopThread() const { ownerLoop_->AssertInLoopThread(); }
 
  private:
   using ChannelMap = std::map<int, Channel*>;
   using EventList = std::vector<struct epoll_event>;
 
   static const int kInitEventListSize = 16;
-  static const char* operationToString(int op);
+  static const char* OperationToString(int op);
 
-  void fillActiveChannels(int numEvents, ChannelList* activeChannels) const;
-  void update(int operation, Channel* channel);
+  void FillActiveChannels(int numEvents, ChannelList* activeChannels) const;
+  void Update(int operation, Channel* channel);
 
   int epollfd_;
 

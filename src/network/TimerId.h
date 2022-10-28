@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-namespace rnet::Network {
+namespace rnet::network {
 
 class Timer;
 

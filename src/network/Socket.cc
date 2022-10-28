@@ -10,24 +10,24 @@
 #include "network/SocketOps.h"
 
 using namespace rnet;
-using namespace rnet::Network;
+using namespace rnet::network;
 
-Socket::~Socket() {
-  if (sockfd_ != NonValidSocketFd) {
+rnet::network::Socket::~Socket() {
+  if (sockfd_ != nonValidSocketFd) {
     LOG_ERROR << "close socket:" << sockfd_ << "\n";
-    Sockets::close(sockfd_);
+    Sockets::close(sockfd);
   }
 }
 
-bool Socket::getTcpInfo(struct tcp_info* tcpi) const {
+bool rnet::network::Socket::GetTcpInfo(struct tcp_info* tcpi) const {
   socklen_t len = sizeof(*tcpi);
-  memZero(tcpi, len);
+  MemZero(tcpi, len);
   return ::getsockopt(sockfd_, SOL_TCP, TCP_INFO, tcpi, &len) == 0;
 }
 
-bool Socket::getTcpInfoString(char* buf, int len) const {
+bool rnet::network::Socket::GetTcpInfoString(char* buf, int len) const {
   struct tcp_info tcpi;
-  bool ok = getTcpInfo(&tcpi);
+  bool ok = GetTcpInfo(&tcpi);
   if (ok) {
     snprintf(
         buf, len,
@@ -49,15 +49,15 @@ bool Socket::getTcpInfoString(char* buf, int len) const {
   return ok;
 }
 
-void Socket::bindAddress(const InetAddress& addr) {
+void rnet::network::Socket::BindAddress(const InetAddress& addr) {
   Sockets::bindOrDie(sockfd_, addr.getSockAddr());
 }
 
-void Socket::listen() { Sockets::listenOrDie(sockfd_); }
+void rnet::network::Socket::Listen() { Sockets::listenOrDie(sockfd); }
 
-int Socket::accept(InetAddress* peeraddr) {
+int rnet::network::Socket::Accept(InetAddress* peeraddr) {
   struct sockaddr_in6 addr;
-  memZero(&addr, sizeof addr);
+  MemZero(&addr, sizeof addr);
   int connfd = Sockets::accept(sockfd_, &addr);
   if (connfd >= 0) {
     peeraddr->setSockAddrInet6(addr);

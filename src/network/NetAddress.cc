@@ -8,7 +8,7 @@
 #include "network/Endian.h"
 
 using namespace rnet;
-using namespace rnet::Network;
+using namespace rnet::network;
 
 static const in_addr_t kInaddrAny = INADDR_ANY;
 static const in_addr_t kInaddrLoopback = INADDR_LOOPBACK;
@@ -24,44 +24,44 @@ InetAddress::InetAddress(uint16_t portArg, bool loopbackOnly, bool ipv6) {
   static_assert(offsetof(InetAddress, addr6_) == 0, "addr6_ offset 0");
   static_assert(offsetof(InetAddress, addr_) == 0, "addr_ offset 0");
   if (ipv6) {
-    memZero(&addr6_, sizeof addr6_);
+    MemZero(&addr6_, sizeof addr6_);
     addr6_.sin6_family = AF_INET6;
     in6_addr ip = loopbackOnly ? in6addr_loopback : in6addr_any;
     addr6_.sin6_addr = ip;
-    addr6_.sin6_port = hostToNetwork16(portArg);
+    addr6_.sin6_port = network::HostToNetwork16(portArg);
   } else {
-    memZero(&addr_, sizeof addr_);
+    MemZero(&addr_, sizeof addr_);
     addr_.sin_family = AF_INET;
     in_addr_t ip = loopbackOnly ? kInaddrLoopback : kInaddrAny;
-    addr_.sin_addr.s_addr = hostToNetwork32(ip);
-    addr_.sin_port = hostToNetwork16(portArg);
+    addr_.sin_addr.s_addr = network::HostToNetwork32(ip);
+    addr_.sin_port = network::HostToNetwork16(portArg);
   }
 }
 
 InetAddress::InetAddress(std::string_view ip, uint16_t portArg, bool ipv6) {
   if (ipv6 || strchr(ip.data(), ':')) {
-    memZero(&addr6_, sizeof addr6_);
-    Sockets::fromIpPort(ip.data(), portArg, &addr6_);
+    MemZero(&addr6_, sizeof addr6_);
+    network::sockets::fromIpPort(ip.data(), portArg, &addr6_);
   } else {
-    memZero(&addr_, sizeof addr_);
-    Sockets::fromIpPort(ip.data(), portArg, &addr_);
+    MemZero(&addr_, sizeof addr_);
+    network::sockets::FromIpPort(ip.data(), portArg, &addr_);
   }
 }
 
-std::string InetAddress::toIpPort() const {
+std::string InetAddress::ToIpPort() const {
   char buf[64] = "";
-  Sockets::toIpPort(buf, sizeof buf, getSockAddr());
+  network::sockets::ToIpPort(buf, sizeof buf, GetSockAddr());
   return buf;
 }
 
-std::string InetAddress::toIp() const {
+std::string InetAddress::ToIp() const {
   char buf[64] = "";
-  Sockets::toIp(buf, sizeof buf, getSockAddr());
+  network::sockets::ToIp(buf, sizeof buf, GetSockAddr());
   return buf;
 }
 
-uint32_t InetAddress::ipv4NetEndian() const {
-  assert(family() == AF_INET);
+uint32_t InetAddress::Ipv4NetEndian() const {
+  assert(Family() == AF_INET);
   return addr_.sin_addr.s_addr;
 }
 
@@ -70,12 +70,12 @@ uint16_t InetAddress::port() const { return networkToHost16(portNetEndian()); }
 // host name resolve buffer
 static thread_local char tResolveBuffer[64 * 1024];
 
-bool InetAddress::resolve(std::string_view hostname, InetAddress* out) {
+bool InetAddress::Resolve(std::string_view hostname, InetAddress* out) {
   assert(out != nullptr);
   struct hostent hent;
   struct hostent* he = nullptr;
   int herrno = 0;
-  memZero(&hent, sizeof(hent));
+  MemZero(&hent, sizeof(hent));
 
   int ret = gethostbyname_r(hostname.data(), &hent, tResolveBuffer,
                             sizeof tResolveBuffer, &he, &herrno);
@@ -91,7 +91,7 @@ bool InetAddress::resolve(std::string_view hostname, InetAddress* out) {
   }
 }
 
-void InetAddress::setScopeId(uint32_t scope_id) {
+void InetAddress::SetScopeId(uint32_t scope_id) {
   if (family() == AF_INET6) {
     addr6_.sin6_scope_id = scope_id;
   }

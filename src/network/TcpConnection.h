@@ -9,7 +9,7 @@
 #include "file/ConnBuffer.h"
 #include "network/Callback.h"
 #include "network/NetAddress.h"
-namespace rnet::Network {
+namespace rnet::network {
 
 class Channel;
 class EventLoop;
@@ -20,7 +20,7 @@ class Socket;
 // TcpConnection
 // 拥有输入输出缓冲区,socket,channel的值语义.在链接析构时指针指针会调用
 // socket的析构函数释放文件描述符.只要在链接的生命周期类对buffer进行的读写都是有效的.
-class TcpConnection : noncopyable,
+class TcpConnection : Noncopyable,
                       public std::enable_shared_from_this<TcpConnection> {
  public:
   // (从服务端来看)构造函数在acceptor调用callback后在tcp server 的new
@@ -30,70 +30,70 @@ class TcpConnection : noncopyable,
                 const InetAddress& localAddr, const InetAddress& peerAddr);
   ~TcpConnection();
 
-  EventLoop* getLoop() const { return loop_; }
-  const std::string& name() const { return name_; }
-  const InetAddress& localAddress() const { return localAddr_; }
-  const InetAddress& peerAddress() const { return peerAddr_; }
+  EventLoop* GetLoop() const { return loop_; }
+  const std::string& Name() const { return name; }
+  const InetAddress& LocalAddress() const { return localAddr; }
+  const InetAddress& PeerAddress() const { return peerAddr; }
   // 获取状态机状态
-  bool connected() const { return state_ == kConnected; }
-  bool disconnected() const { return state_ == kDisconnected; }
+  bool Connected() const { return state_ == kConnected; }
+  bool Disconnected() const { return state_ == kDisconnected; }
   // return true if success.
-  bool getTcpInfo(struct tcp_info*) const;
-  std::string getTcpInfoString() const;
+  bool GetTcpInfo(struct tcp_info*) const;
+  std::string GetTcpInfoString() const;
 
   // void send(string&& message); // C++11
-  void send(const void* message, int len);
-  void send(std::string_view message);
+  void Send(const void* message, int len);
+  void Send(std::string_view message);
   // void send(Buffer&& message); // C++11
-  void send(File::Buffer* message);  // this one will swap data
-  void shutdown();                   // NOT thread safe, no simultaneous calling
+  void Send(file::Buffer* message);  // this one will swap data
+  void Shutdown();                   // NOT thread safe, no simultaneous calling
   // void shutdownAndForceCloseAfter(double seconds); // NOT thread safe, no
   // simultaneous calling
-  void forceClose();
-  void forceCloseWithDelay(double seconds);
-  void setTcpNoDelay(bool on);
+  void ForceClose();
+  void ForceCloseWithDelay(double seconds);
+  void SetTcpNoDelay(bool on);
   // reading or not
-  void startRead();
-  void stopRead();
-  bool isReading() const {
+  void StartRead();
+  void StopRead();
+  bool IsReading() const {
     return reading_;
   };  // NOT thread safe, may race with start/stopReadInLoop
 
   // 出现了复制构造,考虑移动语义?
-  void setContext(const std::any& context) { context_ = context; }
+  void SetContext(const std::any& context) { context_ = context; }
 
-  const std::any& getContext() const { return context_; }
+  const std::any& GetContext() const { return context_; }
 
-  std::any* getMutableContext() { return &context_; }
+  std::any* GetMutableContext() { return &context_; }
 
-  void setConnectionCallback(const ConnectionCallback& cb) {
+  void SetConnectionCallback(const ConnectionCallback& cb) {
     connectionCallback_ = cb;
   }
 
-  void setMessageCallback(const MessageCallback& cb) { messageCallback_ = cb; }
+  void SetMessageCallback(const MessageCallback& cb) { messageCallback_ = cb; }
 
-  void setWriteCompleteCallback(const WriteCompleteCallback& cb) {
+  void SetWriteCompleteCallback(const WriteCompleteCallback& cb) {
     writeCompleteCallback_ = cb;
   }
 
-  void setHighWaterMarkCallback(const HighWaterMarkCallback& cb,
+  void SetHighWaterMarkCallback(const HighWaterMarkCallback& cb,
                                 size_t highWaterMark) {
     highWaterMarkCallback_ = cb;
     highWaterMark_ = highWaterMark;
   }
 
   /// Advanced interface
-  File::Buffer* inputBuffer() { return &inputBuffer_; }
+  file::Buffer* InputBuffer() { return &inputBuffer_; }
 
-  File::Buffer* outputBuffer() { return &outputBuffer_; }
+  file::Buffer* OutputBuffer() { return &outputBuffer_; }
 
   /// Internal use only.
-  void setCloseCallback(const CloseCallback& cb) { closeCallback_ = cb; }
+  void SetCloseCallback(const CloseCallback& cb) { closeCallback_ = cb; }
 
   // called when TcpServer accepts a new connection
-  void connectEstablished();  // should be called only once
+  void ConnectEstablished();  // should be called only once
   // called when TcpServer has removed me from its map
-  void connectDestroyed();  // should be called only once
+  void ConnectDestroyed();  // should be called only once
 
  private:
   // 内部状态机:
@@ -107,38 +107,38 @@ class TcpConnection : noncopyable,
   // 或者被动调用的connectionDestroyed到连接真正析构的一段时间内
   enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting };
 
-  void handleRead(Unix::Timestamp receiveTime);
-  void handleWrite();
-  void handleClose();
-  void handleError();
+  void HandleRead(Unix::Timestamp receiveTime);
+  void HandleWrite();
+  void HandleClose();
+  void HandleError();
   // void sendInLoop(string&& message);
-  void sendInLoop(std::string_view message);
-  void doSendInLoop(const void* message, size_t len);
-  void shutdownInLoop();
+  void SendInLoop(std::string_view message);
+  void DoSendInLoop(const void* message, size_t len);
+  void ShutdownInLoop();
   // void shutdownAndForceCloseInLoop(double seconds);
-  void forceCloseInLoop();
-  void setState(StateE s) { state_ = s; }
-  const char* stateToString() const;
-  void startReadInLoop();
-  void stopReadInLoop();
+  void ForceCloseInLoop();
+  void SetState(StateE s) { state_ = s; }
+  const char* StateToString() const;
+  void StartReadInLoop();
+  void StopReadInLoop();
 
   EventLoop* loop_;
-  const std::string name_;
+  const std::string name;
   StateE state_;  // FIXME: use atomic variable
   bool reading_;
   // we don't expose those classes to client.
   std::unique_ptr<Socket> socket_;
   std::unique_ptr<Channel> channel_;
-  const InetAddress localAddr_;
-  const InetAddress peerAddr_;
+  const InetAddress localAddr;
+  const InetAddress peerAddr;
   ConnectionCallback connectionCallback_;
   MessageCallback messageCallback_;
   WriteCompleteCallback writeCompleteCallback_;
   HighWaterMarkCallback highWaterMarkCallback_;
   CloseCallback closeCallback_;
   size_t highWaterMark_;
-  File::Buffer inputBuffer_;
-  File::Buffer outputBuffer_;  // FIXME: use list<Buffer> as output buffer.
+  file::Buffer inputBuffer_;
+  file::Buffer outputBuffer_;  // FIXME: use list<Buffer> as output buffer.
   std::any context_;
   // FIXME: creationTime_, lastReceiveTime_
   //        bytesReceived_, bytesSent_
